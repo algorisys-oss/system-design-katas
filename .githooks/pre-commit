@@ -1,0 +1,23 @@
+#!/bin/sh
+# >>> repograph >>>
+# Refreshes the committed repo map (.repograph/) and stages it.
+# No-op if no repograph is available, so it never blocks a commit.
+set -e
+ROOT=$(git rev-parse --show-toplevel)
+
+if   [ -n "${REPOGRAPH:-}" ]; then RG="$REPOGRAPH"
+elif [ -x "$ROOT/node_modules/.bin/repograph" ]; then RG="$ROOT/node_modules/.bin/repograph"
+elif command -v repograph >/dev/null 2>&1; then RG=repograph
+elif [ -f "$HOME/lab/ai-tools/repograph/repograph.py" ]; then
+  RG="python3 $HOME/lab/ai-tools/repograph/repograph.py"
+else
+  exit 0
+fi
+
+EXCLUDES="--exclude *node_modules* --exclude */dist/* --exclude .git/* --exclude */.repograph/*"
+# shellcheck disable=SC2086
+$RG "$ROOT" -f index -o "$ROOT/.repograph/index.txt" --cache "$ROOT/.repograph/graph.json" $EXCLUDES >/dev/null 2>&1 || exit 0
+# shellcheck disable=SC2086
+$RG "$ROOT" -f md    -o "$ROOT/.repograph/map.md"    --cache "$ROOT/.repograph/graph.json" $EXCLUDES >/dev/null 2>&1 || exit 0
+git add "$ROOT/.repograph" 2>/dev/null || true
+# <<< repograph <<<

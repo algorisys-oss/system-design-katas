@@ -1,0 +1,12 @@
+
+backend/bin/
+backend/system-design
+.DS_Store
+frontend/dist/
+# go
+.idea/
+*.log
+# node
+node_modules/
+# os / editor
+.vscode/

@@ -1,0 +1,181 @@
+---
+title: "Transactional Outbox"
+slug: transactional-outbox
+level: advanced
+module: distributed-transactions
+order: 17
+reading_time_min: 14
+concepts: [transactional-outbox, dual-write-problem, atomicity, cdc, relay, at-least-once]
+use_cases: []
+prerequisites: [saga-pattern, message-queues, database-transactions]
+status: published
+---
+
+# Transactional Outbox
+
+## Hook — a motivating scenario
+
+Your order service must do two things when an order is placed: **save the order to its database** and
+**publish an "order placed" event** (for the saga, for other services). The naive code does them as
+two separate operations — and that's a trap. If the DB commit succeeds but the publish fails (or vice
+versa), you get an order with no event, or an event for an order that doesn't exist. This is the
+**dual-write problem**, and the **transactional outbox** is its standard fix.
+
+## Mental model — write the event into the DB, in the same transaction
+
+The dual-write problem: you can't atomically write to **two different systems** (a database and a
+message broker) — there's no shared transaction (recall: no ACID across systems; 2PC is the blocking
+alternative). The **transactional outbox** sidesteps it: instead of publishing directly, the service
+writes the event into an **outbox table in the same database, within the same local transaction** as
+the business data. Since it's one local ACID transaction, the order **and** its event are saved
+atomically — both or neither. A separate **relay** process then reads the outbox and publishes the
+events to the broker.
+
+```sequence
+{
+  "title": "Transactional outbox: atomic local write, then relay",
+  "actors": ["Service", "DB", "Relay", "Broker"],
+  "steps": [
+    { "from": "Service", "to": "DB", "label": "BEGIN: INSERT order + INSERT event into outbox" },
+    { "from": "DB", "to": "Service", "label": "COMMIT (order + event atomic)" },
+    { "from": "Relay", "to": "DB", "label": "poll outbox / read change log for new events" },
+    { "from": "Relay", "to": "Broker", "label": "publish event" },
+    { "from": "Relay", "to": "DB", "label": "mark event as published (or rely on CDC offset)" }
+  ]
+}
+```
+
+## Build it up — the relay, and at-least-once delivery
+
+The **relay** (a.k.a. message relay / publisher) moves events from the outbox to the broker. Two
+common implementations:
+- **Polling publisher:** a process periodically queries the outbox table for unpublished rows,
+  publishes them, and marks them done. Simple; adds DB load and a little latency.
+- **Change Data Capture (CDC):** tail the database's **transaction log** (e.g. Debezium reading the
+  WAL/binlog) and publish new outbox rows as they're committed. Lower latency, no polling load — the
+  modern approach.
+
+Crucially, the relay gives **at-least-once** delivery: it might publish an event, then crash before
+marking it done, and republish on restart. So **consumers must be idempotent** (recall idempotency /
+messaging) — duplicates are expected, de-dup by event ID.
+
+```reveal
+{
+  "prompt": "Why does writing the event to an outbox table in the same transaction solve the dual-write problem that 'save order, then publish event' has?",
+  "answer": "The dual-write problem is that the order DB and the message broker are two separate systems with no shared transaction, so any sequence of 'do A then do B' can fail between the two: commit the order but crash before publishing (lost event — other services never learn of the order), or publish the event but fail to commit the order (phantom event for a nonexistent order). You can't make two systems atomic without something like 2PC (blocking, coupled). The outbox eliminates the cross-system write entirely at the moment of the business operation: the event is written as a row in an outbox table in the SAME database, inside the SAME local ACID transaction as the order. So now it's a single local transaction touching one system — either both the order and the outbox row commit, or neither does. There's no window where one exists without the other; atomicity is guaranteed by the database, not by hope. Publishing to the broker is then decoupled and happens AFTER the commit, performed by a separate relay reading the durable outbox — so even if publishing is delayed or retried, the event is safely persisted and will eventually be delivered. You've converted an impossible 'atomic write to two systems' into a trivial 'atomic write to one system' plus an asynchronous, retriable relay. The cost is at-least-once delivery (the relay may republish on crash), handled by idempotent consumers — a small price compared to lost/phantom events."
+}
+```
+
+How you implement the relay is a dial between operational simplicity and delivery latency/load:
+
+```tradeoff
+{ "title": "How should the relay read the outbox?", "axis": { "left": "Polling publisher", "right": "CDC (log tailing)" }, "steps": [
+  { "label": "Pure polling", "detail": "A process periodically queries the outbox for unpublished rows, publishes them, and marks them done. Simplest to build, no extra infrastructure — but adds DB query load and a little latency." },
+  { "label": "Tuned polling", "detail": "Poll more frequently or in larger batches to cut latency, at the cost of more DB load. You're trading freshness against the query overhead of constant polling." },
+  { "label": "CDC (Debezium → Kafka)", "detail": "Tail the DB transaction log (WAL/binlog) and publish new outbox rows as they commit. Lower latency and no polling load — the modern approach — but adds CDC pipeline infrastructure." }
+] }
+```
+
+## Build it up — why not just 2PC or publish-then-commit?
+
+- **2PC** across DB + broker would give atomicity but **blocks** and couples them (recall 2PC) —
+  brokers like Kafka don't fit XA well, and the **2PC coordinator is a SPOF** (unless made highly
+  available). Outbox avoids distributed commit entirely by
+  keeping the atomic part **local**.
+- **Publish-then-commit / commit-then-publish** are both broken (the dual-write race above) — there's
+  always a failure window between the two systems.
+- **Outbox = local atomicity + async relay**: the only atomic action is one local transaction; delivery
+  is decoupled and reliable (at-least-once). This is *the* pattern for "update my data and reliably
+  tell others" — and the reliable event-emission backbone for **sagas** (recall).
+
+```reveal
+{
+  "prompt": "The transactional outbox guarantees the event is saved atomically with the data — but does it guarantee the event is delivered exactly once? What must consumers do?",
+  "answer": "No — it guarantees the event is durably and atomically captured (no lost or phantom events relative to the data), and that it will eventually be delivered, but delivery is at-least-once, not exactly-once. The relay publishes from the outbox and then marks the row published (or advances a CDC offset); if it crashes after publishing but before recording that it published, on restart it will publish the same event again. CDC pipelines and brokers can also redeliver. So the same event can reach consumers multiple times. Achieving true exactly-once end-to-end across separate systems is generally impractical, so the standard approach is 'at-least-once delivery + idempotent consumers = effectively-once processing.' Consumers must therefore de-duplicate: key each event by a unique id (e.g. the outbox row/event id) and ignore ones already processed, or make their handling naturally idempotent (set to a target state, conditional updates) so reprocessing a duplicate has no extra effect. This is the same principle as message queues/webhooks. So the outbox solves the producer-side atomicity (data and event committed together) and durability/reliability of emission, while the consumer side must handle duplicates via idempotency to get correct effectively-once behavior. Designing consumers to assume duplicates is mandatory, not optional, when using an outbox/relay."
+}
+```
+
+## In the wild
+
+- **Outbox + CDC (Debezium → Kafka)** is the standard reliable event-emission pattern in event-driven
+  microservices; many frameworks (e.g. Axon, .NET, Spring) and platforms support it.
+- It's the **reliable producer** for **sagas** (each step atomically commits its local change + emits
+  the next event) and for keeping search indexes/caches in sync via change events.
+- **Pairs with the transactional inbox** (next chapter) on the consumer side for dedup/idempotent
+  processing.
+- The relay's **at-least-once** nature is why **idempotent consumers** are a hard requirement.
+
+## Common misconception — "just save the data and publish the event; it'll be fine"
+
+That's the dual-write problem — there's always a failure window producing lost or phantom events.
+
+```reveal
+{
+  "prompt": "Why is 'commit the order to the DB, then publish the event to Kafka' (or the reverse) fundamentally unreliable, no matter the order?",
+  "answer": "Because the database and the message broker are two independent systems with no shared transaction, so there's always a gap between the two operations where a crash, network failure, or broker outage leaves them inconsistent — and neither ordering avoids it. Commit-then-publish: the order is saved, then the process crashes (or the broker is down) before the event is published → the order exists but no event is ever emitted, so dependent services/sagas never react (lost event, silent inconsistency). Publish-then-commit: the event is published, then the DB commit fails/rolls back → other services act on an order that doesn't actually exist (phantom event), causing wrong downstream effects. Retrying doesn't fix it either: if you retry the publish after a commit, you might double-publish; if you retry the commit after publishing, the broker already emitted. You fundamentally cannot make a write to two separate systems atomic without a distributed-commit protocol (2PC), which is blocking, coupling, and ill-suited to brokers like Kafka. The transactional outbox resolves this by making the only atomic action a single local DB transaction (data + event row together), then relaying the event asynchronously and reliably (at-least-once) to the broker afterward. So 'just save and publish' feels fine in the happy path but is a latent data-integrity bug that surfaces exactly during the failures distributed systems must tolerate — which is why the outbox (or an equivalent) is the correct pattern, not direct dual writes."
+}
+```
+
+The **transactional outbox** solves the **dual-write problem** by writing the event into an **outbox
+table in the same local transaction** as the business data (atomic), then a **relay (polling or CDC)**
+publishes it — **at-least-once**, so consumers must be **idempotent**. It avoids 2PC by keeping the
+atomic part **local**.
+
+## Self-test
+
+```quiz
+{
+  "question": "The transactional outbox solves the dual-write problem by:",
+  "options": [
+    "Using 2PC across the database and broker",
+    "Writing the event to an outbox table in the SAME local transaction as the data, then relaying it to the broker asynchronously",
+    "Publishing the event before committing the data",
+    "Skipping the event entirely"
+  ],
+  "answer": 1,
+  "explanation": "One local ACID transaction makes data + event atomic; a separate relay (polling or CDC) publishes the outbox rows afterward."
+}
+```
+
+```quiz
+{
+  "question": "Because the outbox relay delivers at-least-once, consumers must be:",
+  "options": [
+    "Synchronous",
+    "Idempotent — de-duplicate by event ID, since the relay may republish on crash",
+    "Stateful",
+    "Written in the same language"
+  ],
+  "answer": 1,
+  "explanation": "The relay can publish then crash before marking done, republishing on restart; idempotent consumers make duplicates harmless."
+}
+```
+
+## Recap — key terms
+
+Flip each card to check yourself, then move through the deck:
+
+```flashcards
+{ "title": "Transactional outbox — key terms", "cards": [
+  { "front": "Dual-write problem", "back": "You can't atomically write to two separate systems (a DB and a broker) with no shared transaction — any ordering leaves a failure window producing lost or phantom events." },
+  { "front": "Transactional outbox", "back": "Instead of publishing directly, write the event into an outbox table in the same database, within the same local transaction as the business data — so data and event commit atomically." },
+  { "front": "Relay (message relay / publisher)", "back": "A separate process that reads new rows from the outbox and publishes them to the broker, decoupling delivery from the original local commit." },
+  { "front": "Polling publisher", "back": "A relay that periodically queries the outbox for unpublished rows, publishes them, and marks them done. Simple, but adds DB load and a little latency." },
+  { "front": "Change Data Capture (CDC)", "back": "A relay that tails the DB transaction log (e.g. Debezium reading the WAL/binlog) and publishes new outbox rows as they commit. Lower latency, no polling load — the modern approach." },
+  { "front": "At-least-once delivery", "back": "The relay may publish an event then crash before marking it done, republishing on restart. Duplicates are expected, so consumers must be idempotent (de-dup by event ID)." }
+] }
+```
+
+## Key takeaways
+
+- The **dual-write problem**: you can't atomically write to a **database and a broker** (two systems) —
+  any order leaves a failure window with **lost or phantom events**.
+- The **transactional outbox** writes the event into an **outbox table in the same local transaction**
+  as the data (atomic via the DB), then a **relay (polling or CDC/Debezium)** publishes it.
+- It avoids **2PC** (no distributed commit; the atomic part is **local**) and is the **reliable
+  event-emission backbone for sagas** and data sync.
+- Delivery is **at-least-once** → **consumers must be idempotent** (pairs with the transactional inbox).
+
+## Up next
+
+The consumer-side counterpart for exactly-once *processing*. Next: **Transactional Inbox**.

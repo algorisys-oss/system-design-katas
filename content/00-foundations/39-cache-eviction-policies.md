@@ -1,0 +1,159 @@
+---
+title: "Cache Eviction Policies"
+slug: cache-eviction-policies
+level: foundations
+module: caching-fundamentals
+order: 39
+reading_time_min: 13
+concepts: [eviction, lru, lfu, fifo, ttl, working-set]
+use_cases: []
+prerequisites: [cache-hits-vs-misses]
+status: published
+---
+
+# Cache Eviction Policies
+
+## Hook — a motivating scenario
+
+Your cache is full. A new value needs to go in. **Something has to be removed** — but what? Evict the
+wrong thing and you toss out data that's about to be requested again, tanking your hit rate; evict
+well and the cache keeps exactly the hot data that matters. The rule that decides what to throw out is
+the **eviction policy**, and the default choice is right far more often than not.
+
+## Mental model — a small fridge
+
+A cache is a small fridge with limited shelves. When you buy something new and the fridge is full, you
+must remove an item. The smart move is to remove what you're **least likely to want soon** — not the
+thing you reach for every day. Eviction policies are different guesses at "least likely to want soon."
+
+```compare
+{
+  "options": [
+    { "label": "LRU", "points": ["Evict Least Recently Used", "Bets recent use ⇒ future use (locality)", "Great general default", "Used by Redis, OS/CPU caches (often approximated)"] },
+    { "label": "LFU", "points": ["Evict Least Frequently Used", "Keeps long-term popular items", "Better for stable popularity", "Slower to drop once-popular items"] },
+    { "label": "FIFO", "points": ["Evict oldest inserted", "Ignores how often it's used", "Simple but often poor hit rate", "Rarely the best choice"] }
+  ]
+}
+```
+
+## Build it up — why LRU is the usual default
+
+LRU exploits **temporal locality** (recall the memory hierarchy): data used recently is likely to be
+used again soon, so "least recently used" is a good proxy for "least likely needed next." It's cheap
+to implement (a recency-ordered structure) and works well for typical workloads where a **working
+set** of hot keys is accessed repeatedly.
+
+```match
+{
+  "prompt": "Match the workload to the eviction policy that fits best.",
+  "pairs": [
+    { "left": "Hot working set accessed repeatedly", "right": "LRU (keep recently used)" },
+    { "left": "A few items popular for a long time, amid churn", "right": "LFU (keep frequently used)" },
+    { "left": "Time-sensitive data that should simply expire", "right": "TTL-based expiry" },
+    { "left": "Simplest possible, order of insertion", "right": "FIFO" }
+  ]
+}
+```
+
+**TTL vs eviction** are different (and often combined): TTL removes entries because they're **too old/
+stale** (freshness); eviction removes entries because the cache is **full** (capacity). A real cache
+uses both — expire stale data *and* evict under memory pressure.
+
+```reveal
+{
+  "prompt": "When does LFU beat LRU, and what's LFU's classic weakness?",
+  "answer": "LFU wins when popularity is stable over time amid lots of one-off accesses: a few items are requested constantly while many others are touched once. LRU can evict a perennially-popular item if a burst of new one-time requests pushes it out of 'recent'; LFU keeps it because of its high count. LFU's weakness is staleness of popularity — an item that *was* very popular keeps a high count and lingers even after it's no longer wanted (and new items start at count 1 and can be evicted before they prove popular). Many systems use hybrids (e.g. LRU with frequency hints) to get the best of both."
+}
+```
+
+What signal should "least likely needed next" lean on? Slide from pure recency to pure frequency:
+
+```tradeoff
+{ "title": "What should eviction bet on: recency or frequency?", "axis": { "left": "Pure recency (LRU)", "right": "Pure frequency (LFU)" }, "steps": [
+  { "label": "LRU", "detail": "Evict least recently used. Exploits temporal locality and adapts fast to shifting hot sets, but a burst of one-off requests can push out a perennially-popular item." },
+  { "label": "LRU with frequency hints", "detail": "Mostly recency-ordered but biased to keep items with higher access counts — a hybrid aiming to get the best of both poles." },
+  { "label": "LFU", "detail": "Evict least frequently used. Keeps long-term popular items amid churn, but past popularity goes stale: a once-hot item lingers and new items start at count 1." }
+] }
+```
+
+## In the wild
+
+- **Redis** offers multiple policies (`allkeys-lru`, `allkeys-lfu`, `volatile-ttl`, `noeviction`,
+  etc.) — you pick via config based on workload.
+- **`noeviction`** makes the cache reject new writes when full (rather than evict) — important to
+  understand so you don't get surprise errors under memory pressure.
+- **OS page caches and CPU caches** use LRU-like policies — the same idea, all the way down the stack.
+- **Right-size the cache** so the working set fits: if it's far smaller than the working set, you
+  thrash (constant eviction + misses) regardless of policy.
+
+## Common misconception — "the eviction policy is what makes or breaks the cache"
+
+Policy matters, but **cache size relative to the working set** usually matters more.
+
+```reveal
+{
+  "prompt": "A cache has a terrible hit rate and the team keeps switching eviction policies with no improvement. What are they likely missing?",
+  "answer": "The cache is probably too small for the working set, so it thrashes — no policy can keep enough hot keys resident when there isn't room for them, and items get evicted before they're reused. The bigger lever is usually capacity (or reducing the working set / better key design), not the eviction algorithm. LRU vs LFU is a second-order tweak; if the hot data simply doesn't fit, fix the size first. Policy optimizes *which* items to keep; size determines *how many* you can keep at all."
+}
+```
+
+Eviction policy is a real but second-order knob. First ensure the cache is **big enough for the
+working set**; then LRU is a strong default, with LFU/hybrids for specific popularity patterns.
+
+## Self-test
+
+```quiz
+{
+  "question": "LRU eviction removes the item that was:",
+  "options": [
+    "Inserted first",
+    "Used least recently (longest since last access)",
+    "Accessed the most",
+    "The largest in size"
+  ],
+  "answer": 1,
+  "explanation": "LRU evicts the least-recently-used entry, betting (via temporal locality) it's least likely to be needed next."
+}
+```
+
+```quiz
+{
+  "question": "TTL-based expiry and capacity eviction differ in that:",
+  "options": [
+    "They are the same thing",
+    "TTL removes entries for being too old/stale; eviction removes entries because the cache is full",
+    "TTL only applies to writes",
+    "Eviction makes data fresher"
+  ],
+  "answer": 1,
+  "explanation": "TTL is about freshness (age); eviction is about capacity (room). Real caches use both together."
+}
+```
+
+## Recap — key terms
+
+Flip each card to check yourself, then move through the deck:
+
+```flashcards
+{ "title": "Cache eviction policies — key terms", "cards": [
+  { "front": "Eviction policy", "back": "The rule deciding which entry to remove when a full cache must make room for a new value — a guess at what's least likely to be needed next." },
+  { "front": "LRU", "back": "Least Recently Used: evicts the entry with the longest time since last access. Exploits temporal locality; the strong general default, used by Redis and OS/CPU caches." },
+  { "front": "LFU", "back": "Least Frequently Used: evicts the entry with the lowest access count. Keeps long-term popular items; weak when past popularity goes stale." },
+  { "front": "FIFO", "back": "First In First Out: evicts the oldest inserted entry regardless of use. Simple but usually gives a poorer hit rate." },
+  { "front": "TTL vs eviction", "back": "TTL removes entries for being too old/stale (freshness); eviction removes entries because the cache is full (capacity). Real caches use both together." },
+  { "front": "Working set", "back": "The hot keys accessed repeatedly. If the cache is far smaller than the working set it thrashes (constant eviction + misses) regardless of policy." }
+] }
+```
+
+## Key takeaways
+
+- A full cache must **evict** something; the **policy** guesses what's least likely needed next.
+- **LRU** (least recently used) is the strong general default (exploits temporal locality); **LFU**
+  suits stable long-term popularity; **FIFO** is simple but usually weaker.
+- **TTL (freshness)** and **eviction (capacity)** are distinct and used together.
+- **Cache size vs working set** often matters more than the policy — fix thrashing by sizing first.
+
+## Up next
+
+One of the most impactful caches sits far from your servers, near users. Next: **CDN — Content
+Delivery Network**.
