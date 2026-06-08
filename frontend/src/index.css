@@ -640,6 +640,22 @@ a:hover {
 }
 
 /* Sidebar search + collapsible modules */
+.sidebar-gh {
+  display: inline-block;
+  margin: -0.4rem 0 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--zen-color-primary, #00ff9c);
+  text-decoration: none;
+  border: 1px solid var(--zen-color-border, #1b2a20);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  text-shadow: 0 0 8px rgba(0, 255, 156, 0.35);
+}
+.sidebar-gh:hover {
+  border-color: var(--zen-color-primary, #00ff9c);
+  box-shadow: 0 0 0 1px var(--zen-color-primary, #00ff9c);
+}
 .sidebar-search {
   width: 100%;
   margin-bottom: 1rem;

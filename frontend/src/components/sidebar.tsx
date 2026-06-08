@@ -97,6 +97,15 @@ export function Sidebar({ curriculum }: { curriculum: LevelNode[] }) {
         <NavLink to="/" onClick={onNavigate}>System Design</NavLink>
       </h2>
 
+      <a
+        className="sidebar-gh"
+        href="https://github.com/algorisys-oss/system-design-katas"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        ★ Star on GitHub
+      </a>
+
       <input
         className="sidebar-search"
         type="search"
