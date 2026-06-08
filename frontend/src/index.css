@@ -349,6 +349,17 @@ a:hover {
   margin-bottom: 0.9rem;
   color: #eafff2;
 }
+/* Compare blocks render as zen-ui Tabs, whose TabsList is inline-flex with a
+   fixed height + overflow-hidden — so 4+ tabs get clipped. Scoped to our
+   interactive blocks: let the tab list wrap to multiple rows instead. */
+.interaction [role="tablist"] {
+  flex-wrap: wrap;
+  height: auto;
+  overflow: visible;
+}
+.interaction [role="tablist"] [role="tab"] {
+  flex: 0 0 auto;
+}
 .match-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

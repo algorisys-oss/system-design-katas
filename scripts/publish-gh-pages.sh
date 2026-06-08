@@ -60,7 +60,9 @@ if [ "$BUILD_ONLY" = "1" ]; then
   exit 0
 fi
 
-REMOTE="$(git -C "$ROOT" remote get-url origin)"
+# Target remote for the gh-pages branch. Defaults to this repo's origin; override
+# with PAGES_REMOTE (e.g. the OSS repo — see scripts/gh-deploy.sh).
+REMOTE="${PAGES_REMOTE:-$(git -C "$ROOT" remote get-url origin)}"
 SHA="$(git -C "$ROOT" rev-parse --short HEAD)"
 echo "▸ Force-pushing dist/ to $PAGES_BRANCH on $REMOTE"
 
