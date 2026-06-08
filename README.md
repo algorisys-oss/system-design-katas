@@ -96,25 +96,21 @@ JSON** and the SPA fetches that. One script does everything (build with the Page
 mode, generate the JSON, add the SPA `404.html` fallback + `.nojekyll`, and force-push to `gh-pages`):
 
 ```bash
-scripts/publish-gh-pages.sh           # build + publish to this repo's gh-pages branch
-scripts/publish-gh-pages.sh --build   # build only (then preview locally)
-
-scripts/gh-deploy.sh                  # build + deploy to the OSS repo's Pages
-scripts/gh-deploy.sh --build          # build only
+scripts/gh-deploy.sh           # build + deploy to the OSS repo's Pages
+scripts/gh-deploy.sh --build   # build only (then preview locally)
 ```
 
-`gh-deploy.sh` targets the public OSS repo
-(**https://algorisys-oss.github.io/system-design-katas/**) — same pipeline, different remote
-(`PAGES_REMOTE`). The `gh-pages` branch holds only the built site (SPA + pre-rendered JSON), so the
-deployed site is inherently LLM-free regardless of which remote you push to.
+`gh-deploy.sh` deploys to the public OSS repo's `gh-pages` branch
+(**https://algorisys-oss.github.io/system-design-katas/**). The branch holds only the built site (SPA
++ pre-rendered JSON) — no source — so the deployed site is inherently LLM-free.
 
-Then in GitHub: **Settings → Pages → Source = branch `gh-pages`, folder `/` (root)**. Site lands at
-`https://<user-or-org>.github.io/system-design-katas/`.
+Then in GitHub: **Settings → Pages → Source = branch `gh-pages`, folder `/` (root)**.
 
 - Runs **locally** (not CI) because the frontend aliases the in-house zen-ui clone's `dist/`, which
   isn't on npm — build the zen-ui lib first (`bun run build:lib` in the clone). Override its path with
   `ZEN_UI_DIST`.
-- Config via env: `PAGES_BASE` (default `/system-design-katas/`), `PAGES_BRANCH` (default `gh-pages`).
+- Config via env: `PAGES_REMOTE` (default the OSS repo), `PAGES_BASE` (default `/system-design-katas/`),
+  `PAGES_BRANCH` (default `gh-pages`).
 - The static JSON generator ([scripts/gen-static-api.mjs](scripts/gen-static-api.mjs)) mirrors the Go
   API's shape/ordering, so the same frontend works against the live API (dev / real server, `base=/`)
   or static files (`VITE_STATIC=1`). Moving to a real server later just means dropping the static mode.
