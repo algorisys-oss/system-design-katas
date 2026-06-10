@@ -39,7 +39,7 @@ voted YES); one that's still in the voting phase can safely **abort on timeout**
 ```sequence
 {
   "title": "Three-phase commit (extra pre-commit enables safe timeouts)",
-  "actors": ["Coordinator", "ServiceA", "ServiceB"],
+  "actors": ["Coordinator", "ServiceA"],
   "steps": [
     { "from": "Coordinator", "to": "ServiceA", "label": "CanCommit?" },
     { "from": "ServiceA", "to": "Coordinator", "label": "YES" },

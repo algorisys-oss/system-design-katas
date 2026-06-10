@@ -33,10 +33,9 @@ of writes and storage — so total write capacity and storage scale with the num
   "nodes": [
     { "label": "Write / query", "detail": "Comes in with some key (e.g. user_id)." },
     { "label": "Router", "detail": "Maps the shard key → which shard holds that data." },
-    { "label": "Shard A", "detail": "Rows for one key range/bucket. Own primary + replicas." },
-    { "label": "Shard B", "detail": "A different slice of the data — independent writes & storage." }
+    { "label": "One shard (of N)", "detail": "The router picks exactly ONE shard for this key — rows for one key range/bucket, with its own primary + replicas." }
   ],
-  "note": "Each shard is a full database for its slice. More shards → more total write + storage capacity."
+  "note": "Shards A, B, C… are parallel siblings, not a pipeline: the router maps the shard key to exactly one of them, so each request lands on a single shard. Each shard is a full database for its slice. More shards → more total write + storage capacity."
 }
 ```
 

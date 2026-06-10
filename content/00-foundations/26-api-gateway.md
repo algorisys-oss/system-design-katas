@@ -33,10 +33,9 @@ department. An API gateway is that front desk for your services: a single entry 
   "nodes": [
     { "label": "Clients", "detail": "Web, mobile, partners — all talk to one address." },
     { "label": "API Gateway", "detail": "Auth, rate limiting, routing, logging, TLS termination — done once, centrally." },
-    { "label": "Users svc", "detail": "Receives only valid, authenticated, rate-limited requests for /users." },
-    { "label": "Orders svc", "detail": "Same — the gateway routed /orders here." }
+    { "label": "Backend services (1..N)", "detail": "Each receives only valid, authenticated, rate-limited requests for its paths." }
   ],
-  "note": "Clients see one API; the gateway routes /users → users svc, /orders → orders svc, etc."
+  "note": "Clients see one API; the gateway fans out, routing /users → users svc, /orders → orders svc, etc. — these are sibling backends reached in parallel, not a chain."
 }
 ```
 

@@ -92,8 +92,9 @@ Slide along the consistency spectrum to see what each point buys and costs:
 ## In the wild
 
 - **Causally-consistent stores / sessions:** MongoDB causal-consistency sessions and COPS provide
-  causal consistency as a store-level model. **Dynamo-style systems** (Riak, Cassandra) use **version
-  vectors** to *detect* concurrent writes and surface siblings (causal tracking) — but their default
+  causal consistency as a store-level model. **Dynamo-style systems** like **Riak** use **version
+  vectors** to *detect* concurrent writes and surface siblings (causal tracking) — Cassandra instead
+  resolves conflicts with last-write-wins on per-cell timestamps — but their default
   model is **eventual**, not causal. Many "collaborative" features rely on causal order.
 - It's the model behind **"my reply can't appear before the message"**, comment threads, and
   edit-after-create ordering across replicas.

@@ -32,7 +32,7 @@ home.
 ```sequence
 {
   "title": "Hinted handoff during a temporary node failure",
-  "actors": ["Coordinator", "NodeA", "NodeB(home)", "NodeC"],
+  "actors": ["Coordinator", "NodeB(home)", "NodeC"],
   "steps": [
     { "from": "Coordinator", "to": "NodeB(home)", "label": "write key=v ... NodeB is DOWN" },
     { "from": "Coordinator", "to": "NodeC", "label": "store key=v + hint 'belongs to NodeB'" },

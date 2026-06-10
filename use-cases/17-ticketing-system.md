@@ -189,8 +189,9 @@ as one transaction so it's all-or-nothing.
   "steps": [
     { "from": "BuyerA", "to": "Inventory", "label": "hold 14F (idem-key A)" },
     { "from": "BuyerB", "to": "Inventory", "label": "hold 14F (idem-key B)" },
-    { "from": "Inventory", "to": "DB", "label": "UPDATE seat SET state=held WHERE id=14F AND state=available" },
+    { "from": "Inventory", "to": "DB", "label": "A: UPDATE seat SET state=held WHERE id=14F AND state=available" },
     { "from": "DB", "to": "Inventory", "label": "A: rows affected = 1 (won)" },
+    { "from": "Inventory", "to": "DB", "label": "B: UPDATE seat SET state=held WHERE id=14F AND state=available" },
     { "from": "DB", "to": "Inventory", "label": "B: rows affected = 0 (lost — already held)" },
     { "from": "Inventory", "to": "BuyerA", "label": "hold_id + expires_at" },
     { "from": "Inventory", "to": "BuyerB", "label": "409 conflict — pick another seat" }
@@ -266,7 +267,7 @@ transaction across them. This is a **saga** (recall): a sequence of local transa
 
 ```sequence
 {
-  "title": "Purchase saga (happy path + compensation)",
+  "title": "Purchase saga (happy path)",
   "actors": ["Buyer", "OrderSvc", "Inventory", "Payment"],
   "steps": [
     { "from": "Buyer", "to": "OrderSvc", "label": "purchase hold H (idem-key)" },

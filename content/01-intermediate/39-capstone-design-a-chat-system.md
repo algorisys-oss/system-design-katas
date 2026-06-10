@@ -83,14 +83,14 @@ office that is.
 ```sequence
 {
   "title": "Delivering a message: receive → persist → route (online) / store (offline)",
-  "actors": ["UserA", "ConnSvr3", "MsgSvc", "Backplane", "ConnSvr7", "UserB"],
+  "actors": ["UserA", "ConnSvr3", "MsgSvc", "Backplane", "ConnSvr7", "UserB", "OfflineQueue"],
   "steps": [
     { "from": "UserA", "to": "ConnSvr3", "label": "send message to B (over WebSocket)" },
     { "from": "ConnSvr3", "to": "MsgSvc", "label": "persist message + assign sequence id (durable)" },
     { "from": "MsgSvc", "to": "Backplane", "label": "B online (per presence)? → publish to B's channel" },
     { "from": "Backplane", "to": "ConnSvr7", "label": "ConnSvr7 is subscribed for B → deliver" },
     { "from": "ConnSvr7", "to": "UserB", "label": "push over B's WebSocket (real-time)" },
-    { "from": "MsgSvc", "to": "UserB", "label": "(B offline: no live socket → message stays durable; push notification; B syncs on reconnect)" }
+    { "from": "MsgSvc", "to": "OfflineQueue", "label": "(alt: B offline — no live socket → enqueue + push notification; B syncs on reconnect)" }
   ]
 }
 ```
@@ -117,8 +117,8 @@ or left in the durable store for the recipient to sync on reconnect if not.
   "nodes": [
     { "label": "Clients (WebSocket)", "detail": "Persistent full-duplex connection to a connection server." },
     { "label": "Connection servers", "detail": "Stateful: hold live WebSockets. ~500 of them; behind a connection-aware LB." },
-    { "label": "Pub/sub backplane", "detail": "Routes messages to the server holding each recipient (Redis Pub/Sub / NATS). Fan-out for groups." },
     { "label": "Message service + store", "detail": "Persists every message (sharded by conversation), assigns IDs/ordering." },
+    { "label": "Pub/sub backplane", "detail": "Routes messages to the server holding each recipient (Redis Pub/Sub / NATS). Fan-out for groups." },
     { "label": "Offline queue / push", "detail": "If recipient offline: queue for reconnect + send mobile push notification." }
   ],
   "note": "Real-time path: client → conn server → persist + publish → recipient's conn server → client. Offline → queue + push."

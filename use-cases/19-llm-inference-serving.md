@@ -211,9 +211,11 @@ Two key techniques (both inline):
     { "from": "Client", "to": "Gateway", "label": "POST /chat (stream=true)" },
     { "from": "Gateway", "to": "Scheduler", "label": "auth + token-rate check; enqueue (tenant, priority)" },
     { "from": "Scheduler", "to": "GpuWorker", "label": "admit when KV-cache memory free; run PREFILL" },
-    { "from": "GpuWorker", "to": "Client", "label": "first token (TTFT) via SSE" },
+    { "from": "GpuWorker", "to": "Gateway", "label": "first token (TTFT)" },
+    { "from": "Gateway", "to": "Client", "label": "forward first token as SSE chunk (no buffering)" },
     { "from": "GpuWorker", "to": "GpuWorker", "label": "DECODE step (joins continuous batch each step)" },
-    { "from": "GpuWorker", "to": "Client", "label": "stream tokens (TPOT each) until EOS / max_tokens" },
+    { "from": "GpuWorker", "to": "Gateway", "label": "tokens (TPOT each) until EOS / max_tokens" },
+    { "from": "Gateway", "to": "Client", "label": "pipe tokens through same SSE stream" },
     { "from": "GpuWorker", "to": "Scheduler", "label": "sequence done → free KV-cache slot for next waiter" }
   ]
 }

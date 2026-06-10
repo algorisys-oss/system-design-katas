@@ -33,10 +33,9 @@ turns "many servers" into "one address that's always available."
   "nodes": [
     { "label": "Clients", "detail": "All hit one public address (the load balancer)." },
     { "label": "Load balancer", "detail": "Picks a healthy server per request and forwards it; routes around failures." },
-    { "label": "Server 1", "detail": "Handles its share of requests (stateless → interchangeable)." },
-    { "label": "Server 2", "detail": "Same. Add/remove servers freely behind the LB." }
+    { "label": "Server pool (1..N, interchangeable)", "detail": "Each request goes to ONE healthy server; servers are stateless → interchangeable. Add/remove them freely behind the LB." }
   ],
-  "note": "One address out front; many interchangeable servers behind. The LB is how horizontal scaling actually works."
+  "note": "One address out front; many interchangeable servers behind. This is a fan-out, not a chain: the LB sends each request to ONE of the N parallel servers (not server-to-server in sequence). The LB is how horizontal scaling actually works."
 }
 ```
 

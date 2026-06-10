@@ -32,12 +32,11 @@ so the client gets one efficient, purpose-fit API instead of wrestling a generic
 {
   "title": "A BFF per client type, fronting shared services",
   "nodes": [
-    { "label": "Mobile app → Mobile BFF", "detail": "Small, battery/bandwidth-friendly payloads; few round trips." },
-    { "label": "Web app → Web BFF", "detail": "Richer data for big screens; aggregates many services per page." },
-    { "label": "TV app → TV BFF", "detail": "Its own shape/fields for the TV UX." },
+    { "label": "Client (mobile / web / TV)", "detail": "Each client type talks only to its own BFF." },
+    { "label": "Its BFF (one per client type)", "detail": "Mobile BFF: small, battery/bandwidth-friendly payloads. Web BFF: richer data, aggregates many services per page. TV BFF: its own shape/fields." },
     { "label": "Shared downstream services", "detail": "Orders, users, catalog, etc. — each BFF composes from these." }
   ],
-  "note": "Each BFF tailors aggregation/shape for ITS client; all sit in front of the same underlying services."
+  "note": "This is one representative pipeline. In reality there are multiple PEER BFFs — a Mobile BFF, a Web BFF, a TV BFF — each fronting the SAME shared services in PARALLEL; the BFFs do not chain into one another. Each BFF tailors aggregation/shape for ITS client."
 }
 ```
 

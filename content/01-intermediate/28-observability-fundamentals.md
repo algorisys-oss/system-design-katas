@@ -32,9 +32,9 @@ fact? You achieve it by emitting three complementary kinds of telemetry, the **"
 {
   "title": "The three pillars of observability",
   "layers": [
-    { "label": "Logs", "detail": "Discrete, timestamped event records ('order 123 failed: timeout'). Detail for a specific moment.", "meta": "events" },
     { "label": "Metrics", "detail": "Numeric measurements over time (request rate, error %, p99 latency, CPU). Aggregate trends + alerts.", "meta": "numbers" },
-    { "label": "Traces", "detail": "The path of ONE request across services, with timing per hop. Finds WHERE the time/failure is.", "meta": "requests" }
+    { "label": "Traces", "detail": "The path of ONE request across services, with timing per hop. Finds WHERE the time/failure is.", "meta": "requests" },
+    { "label": "Logs", "detail": "Discrete, timestamped event records ('order 123 failed: timeout'). Detail for a specific moment.", "meta": "events" }
   ]
 }
 ```

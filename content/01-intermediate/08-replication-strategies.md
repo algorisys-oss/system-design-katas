@@ -60,7 +60,7 @@ data concurrently, producing **write conflicts** that must be resolved when thei
 
 ## Build it up — leaderless and quorums
 
-**Leaderless** (Dynamo-style: Cassandra, DynamoDB) drops the leader entirely — **any replica accepts
+**Leaderless** (Dynamo-style: Cassandra, Riak) drops the leader entirely — **any replica accepts
 reads and writes**, and consistency is tuned with **quorums**: a write goes to W replicas, a read
 queries R replicas, and if **R + W > N** (N = total replicas), reads and writes overlap on at least
 one node, so reads see the latest **completed** write (under a strict quorum — concurrent writes,
@@ -91,8 +91,9 @@ Slide across the strategies to see the trade between write availability/locality
   consistency and simplicity.
 - **Multi-leader** appears in **multi-region active-active** setups and offline-capable apps (each
   device/region a leader that syncs) — and brings conflict resolution (LWW, CRDTs).
-- **Leaderless + quorums** powers AP-leaning, write-available stores (**Cassandra, DynamoDB, Riak**);
-  you tune R/W per query.
+- **Leaderless + quorums** powers AP-leaning, write-available stores (**Cassandra, Riak**); you tune
+  R/W per query. (The AWS **DynamoDB** service is in this lineage but is a managed leader/Paxos design
+  offering a per-read strong-vs-eventual choice, not tunable R/W quorums.)
 - The choice is a **CAP-shaped decision per dataset**: most data → single-leader; globally-written or
   always-available data → multi-leader/leaderless with explicit conflict handling.
 

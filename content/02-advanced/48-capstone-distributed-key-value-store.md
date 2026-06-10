@@ -145,13 +145,15 @@ This is where the whole module converges:
 ```sequence
 {
   "title": "A put() during a node failure (sloppy quorum + vector clock)",
-  "actors": ["Client", "Coordinator", "ReplicaUp", "ReplicaDown"],
+  "actors": ["Client", "Coordinator", "ReplicaUp", "ReplicaDown", "StandIn"],
   "steps": [
     { "from": "Client", "to": "Coordinator", "label": "put(key, value) — coordinator = any node" },
-    { "from": "Coordinator", "to": "ReplicaUp", "label": "write w/ vector clock (ack 1)" },
-    { "from": "Coordinator", "to": "ReplicaDown", "label": "DOWN → write to a stand-in w/ HINT (sloppy)" },
-    { "from": "ReplicaUp", "to": "Coordinator", "label": "W acks reached → success (stays available)" },
-    { "from": "Coordinator", "to": "ReplicaDown", "label": "later: hinted handoff + anti-entropy reconcile" }
+    { "from": "Coordinator", "to": "ReplicaUp", "label": "write w/ vector clock" },
+    { "from": "ReplicaUp", "to": "Coordinator", "label": "ack 1" },
+    { "from": "Coordinator", "to": "StandIn", "label": "ReplicaDown is DOWN → write w/ HINT for it (sloppy)" },
+    { "from": "StandIn", "to": "Coordinator", "label": "ack 2 → W=2 acks reached → success (stays available)" },
+    { "from": "StandIn", "to": "ReplicaDown", "label": "later: hinted handoff on recovery" },
+    { "from": "ReplicaUp", "to": "ReplicaDown", "label": "anti-entropy (Merkle) reconcile" }
   ]
 }
 ```

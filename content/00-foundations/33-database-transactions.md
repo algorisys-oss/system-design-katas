@@ -30,12 +30,12 @@ Until commit, your changes aren't visible to others and can be undone cleanly.
 ```sequence
 {
   "title": "A transaction: commit vs rollback",
-  "actors": ["App", "Database"],
+  "actors": ["App", "Database", "PaymentAPI"],
   "steps": [
     { "from": "App", "to": "Database", "label": "BEGIN" },
     { "from": "App", "to": "Database", "label": "UPDATE inventory -1" },
     { "from": "App", "to": "Database", "label": "INSERT order" },
-    { "from": "App", "to": "Database", "label": "charge card... FAILED" },
+    { "from": "App", "to": "PaymentAPI", "label": "charge card (external)... FAILED" },
     { "from": "App", "to": "Database", "label": "ROLLBACK (undo inventory + order)" },
     { "from": "Database", "to": "App", "label": "state unchanged — no partial checkout" }
   ]

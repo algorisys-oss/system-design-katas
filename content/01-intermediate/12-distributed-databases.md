@@ -87,8 +87,9 @@ staleness).
 
 ## In the wild
 
-- **AP / wide-column / key-value:** Cassandra, DynamoDB, Riak — massive scale, tunable/eventual
-  consistency, leaderless quorums.
+- **AP / wide-column / key-value:** Cassandra, Riak — massive scale, tunable/eventual consistency,
+  leaderless quorums. (Amazon DynamoDB is a managed member of this family but is leader/Paxos-based
+  with a per-read strong-vs-eventual choice, not configurable R/W quorums.)
 - **NewSQL (strong + scalable SQL):** Google Spanner, CockroachDB, YugabyteDB — consensus-backed.
 - **Document/distributed:** MongoDB (sharded clusters with replica sets).
 - Managed services hide much of the ops, but **you still choose the consistency level and shard/

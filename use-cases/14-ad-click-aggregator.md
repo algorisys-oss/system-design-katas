@@ -157,7 +157,7 @@ now seen all events with timestamp ≤ T."* When the watermark passes a window's
   "steps": [
     { "from": "ClickSDK", "to": "Kafka", "label": "click @ event-time 12:00:58 (arrives 12:01:30)" },
     { "from": "Kafka", "to": "Processor", "label": "consume; place in window [12:00,12:01)" },
-    { "from": "Processor", "to": "Processor", "label": "watermark = 12:01:00 - allowedLateness(60s) = 12:00:00 → window still open" },
+    { "from": "Processor", "to": "Processor", "label": "watermark = maxEventTimeSeen(12:01:00) - allowedLateness(60s) = 12:00:00 < window end 12:01:00 → still open" },
     { "from": "Processor", "to": "Processor", "label": "later: watermark crosses 12:01:00 → close window [12:00,12:01)" },
     { "from": "Processor", "to": "TSStore", "label": "emit count for ad over [12:00,12:01)" },
     { "from": "ClickSDK", "to": "Kafka", "label": "VERY late click @ 12:00:30 (arrives 12:10)" },

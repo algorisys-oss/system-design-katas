@@ -112,9 +112,11 @@ The redirect (read) path, step by step:
   "steps": [
     { "from": "Client", "to": "App", "label": "GET /aZ3x" },
     { "from": "App", "to": "Cache", "label": "lookup aZ3x" },
-    { "from": "Cache", "to": "App", "label": "HIT → long URL (µs)" },
-    { "from": "App", "to": "Client", "label": "301/302 redirect" },
-    { "from": "App", "to": "DB", "label": "(on MISS only) read + populate cache" }
+    { "from": "Cache", "to": "App", "label": "MISS" },
+    { "from": "App", "to": "DB", "label": "read aZ3x" },
+    { "from": "DB", "to": "App", "label": "long URL" },
+    { "from": "App", "to": "Cache", "label": "populate (so next read HITs in µs)" },
+    { "from": "App", "to": "Client", "label": "301/302 redirect" }
   ]
 }
 ```

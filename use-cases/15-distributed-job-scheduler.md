@@ -183,9 +183,9 @@ This is the crux. Walk a job through, including the failure that bites everyone:
   "title": "Execution with lease + fencing token",
   "actors": ["Coordinator", "Queue", "WorkerA", "Store", "WorkerB"],
   "steps": [
-    { "from": "Coordinator", "to": "Queue", "label": "enqueue run(J), fence=7" },
+    { "from": "Coordinator", "to": "Queue", "label": "enqueue run(J)" },
     { "from": "Queue", "to": "WorkerA", "label": "deliver J (visibility timeout 30s)" },
-    { "from": "WorkerA", "to": "Store", "label": "claim lease(J), check fence>=7" },
+    { "from": "WorkerA", "to": "Store", "label": "claim lease(J), bump fence to 7" },
     { "from": "WorkerA", "to": "WorkerA", "label": "long GC pause / network stall (>30s)" },
     { "from": "Queue", "to": "WorkerB", "label": "redeliver J (timeout expired), fence=8" },
     { "from": "WorkerB", "to": "Store", "label": "claim lease(J), bump fence to 8, execute" },

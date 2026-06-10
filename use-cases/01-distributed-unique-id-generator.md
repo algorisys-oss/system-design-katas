@@ -118,7 +118,7 @@ or as a **local sidecar**; the only coordination is a **one-time worker-id assig
     { "label": "App instance", "detail": "Calls nextId() locally — a few bit ops, sub-microsecond, no network." },
     { "label": "Snowflake generator (in-process)", "detail": "Reads local clock, packs timestamp | workerId | sequence into one int64." },
     { "label": "Worker-id registry (startup only)", "detail": "ZooKeeper/etcd/config hands each instance a unique workerId once, at boot — never on the hot path." },
-    { "label": "Local monotonic clock", "detail": "Kept close to real time by NTP; the source of the high bits and the thing that can misbehave." }
+    { "label": "Local wall clock", "detail": "Kept close to real time by NTP; the source of the high bits and the thing that can misbehave." }
   ],
   "note": "The registry is touched once per process lifetime. Every nextId() call is purely local — that's why it survives fleet-wide partitions."
 }

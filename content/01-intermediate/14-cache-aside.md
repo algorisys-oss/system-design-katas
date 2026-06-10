@@ -34,8 +34,10 @@ next time. The cache only ever holds data that's actually been requested ("lazy 
     { "from": "App", "to": "Cache", "label": "GET key" },
     { "from": "Cache", "to": "App", "label": "miss" },
     { "from": "App", "to": "DB", "label": "read from database" },
+    { "from": "DB", "to": "App", "label": "row / value" },
     { "from": "App", "to": "Cache", "label": "SET key (with TTL)" },
-    { "from": "App", "to": "Cache", "label": "next GET key → hit (fast)" }
+    { "from": "App", "to": "Cache", "label": "next GET key" },
+    { "from": "Cache", "to": "App", "label": "hit (fast)" }
   ]
 }
 ```
