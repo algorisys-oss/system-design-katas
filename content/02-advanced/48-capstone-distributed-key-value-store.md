@@ -21,6 +21,21 @@ It's the ultimate "AP" system — always writable, horizontally scalable, no sin
 and it weaves together **consistent hashing, tunable quorums, vector clocks, gossip, hinted handoff, and
 Merkle-tree anti-entropy**. Follow the method: requirements → estimate → design → trade-offs → failures.
 
+## Mental model: a clock face of houses, and a council of neighbors
+
+Picture the hash ring as a **clock face**. Every node sits at some hour mark, and every key lands at its own
+spot on the dial. To find where a key lives, drop it on the face and let it **roll clockwise** to the next
+**N houses** it passes — those N houses are its **preference list**, the replicas that store it. Add a new
+house to the ring and only the keys that now roll into *it* move (~1/N); nobody else is disturbed — that's
+incremental scaling.
+
+Now picture reads and writes as **asking the neighbors**. You don't trust one house's word and you don't
+wake the whole street: you **ask R of the N neighbors** when reading and only **commit a write once W of
+them agree** to hold it. Set the quorum so the people you ask to read always overlap the people who
+confirmed the last write (`R + W > N`) and a read tends to see the latest fact. When a house is dark
+(down), a **stand-in neighbor takes the message** and slips it under the right door later (hinted handoff).
+Keep that picture — clock face of houses, a council of neighbors — and every technique below has a home.
+
 ## 1 · Clarify requirements
 
 **Functional:** `get(key)` and `put(key, value)` over a simple key-value model (no joins/queries) —
@@ -161,7 +176,24 @@ This is where the whole module converges:
   replicate) → design (ring + quorums + gossip) → trade-offs (eventual consistency, conflict handling) →
   failures (handoff/repair). This *is* Dynamo — and the toolkit generalizes to any large-scale store.
 
-## Self-test
+## Common misconception
+
+**"Setting R + W > N gives you strong consistency."** This is the most persistent myth about quorum
+stores, and it is wrong. `R + W > N` only guarantees that the set of replicas a read contacts **overlaps**
+the set that acknowledged the last *completed* write — so the read set is *guaranteed to include at least
+one node that has the latest durable version*. That is a useful property, but it is **not linearizability**:
+
+- With a **sloppy quorum + hinted handoff**, the W acks may come from stand-in nodes that aren't even on the
+  key's preference list, so a subsequent R-read of the home replicas can miss that write entirely — the
+  overlap guarantee quietly breaks.
+- **Concurrent writes** still produce divergent versions; the read returns them as **siblings**. The store
+  detected a conflict, but you did not get a single "correct" current value.
+- Reads can observe **in-flight** state: a write in progress that has reached some but not all replicas means
+  two near-simultaneous reads can disagree about whether the write happened.
+
+So `R + W > N` buys you read/write **overlap** and "read-your-writes-style" freshness on the common path —
+not the global ordering guarantee of a CP/consensus system. If you truly need linearizability, you need a
+different design. Quorums tune the consistency/availability dial; they do not flip it to "strong."
 
 ```quiz
 {

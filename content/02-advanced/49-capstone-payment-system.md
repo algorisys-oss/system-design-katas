@@ -5,9 +5,9 @@ level: advanced
 module: advanced-capstones
 order: 49
 reading_time_min: 22
-concepts: [payments, idempotency, exactly-once, saga, transactional-outbox, double-entry, reconciliation]
+concepts: [payments, idempotency, exactly-once, saga, transactional-outbox, transactional-inbox, double-entry, reconciliation]
 use_cases: []
-prerequisites: [idempotency-and-safe-methods, saga-pattern, transactional-outbox, two-phase-commit, slis-slos-error-budgets]
+prerequisites: [idempotency-and-safe-methods, saga-pattern, transactional-outbox, transactional-inbox, two-phase-commit, slis-slos-error-budgets]
 status: published
 ---
 
@@ -21,6 +21,16 @@ created from nothing. It composes the **transactions & eventing** module with **
 **reliability**: idempotency keys, sagas, the transactional outbox, double-entry ledgers, and
 reconciliation. The recurring theme: **at-least-once delivery + idempotency = effectively-once**, and
 **correctness beats availability** when it's someone's money.
+
+## Mental model: an accountant's books
+
+Picture the system as **an accountant's double-entry books**. Every entry has a matching counter-entry,
+so the books **always balance** — money can't appear or vanish, only move from one column to another. You
+**never erase history**: a refund isn't a deletion, it's a new *reversing* entry posted on top, so the
+full story stays auditable forever. And before settling, the accountant **cross-checks the books against
+the bank statement** — that cross-check is reconciliation. Hold this picture: balanced entries,
+append-only history, periodic cross-check. Every mechanism below is a way to make those three guarantees
+hold under retries, crashes, and an unreliable external provider.
 
 ## 1 · Clarify requirements
 
@@ -123,6 +133,24 @@ correct" isn't good enough for money**.
 }
 ```
 
+## In the wild
+
+These patterns are exactly how real payment platforms operate:
+
+- **Stripe** exposes **idempotency keys** as a first-class API feature: you send an `Idempotency-Key`
+  header (a unique value per intent), and Stripe stores the result and **replays the saved response for
+  24 hours**, so a retried request returns the original outcome instead of creating a second charge —
+  the cornerstone pattern above, productized. (Per Stripe's API docs, idempotency results are saved for
+  24 hours.)
+- **Double-entry ledgers as the source of truth** are the norm: companies like Square build their money
+  movement on append-only, always-balanced ledgers, and purpose-built ledger databases such as
+  **TigerBeetle** are engineered specifically for high-throughput double-entry accounting with debits and
+  credits committed atomically — balances are *derived*, never mutated in place.
+- **Reconciliation runs on a regular cadence** against the provider and bank settlement files — commonly
+  **daily** (matching the typical T+1/T+2 settlement and daily statement cycle), with discrepancies
+  flagged for automated repair or manual investigation. "Probably correct" is never good enough, so the
+  books are continuously proven against reality.
+
 ## 5 · Trade-offs and method recap
 
 - **Correctness over availability (CP-leaning):** when uncertain, **hold/reject** rather than risk a wrong
@@ -141,6 +169,23 @@ Slide the dial to see how the same toolkit serves opposite priorities, from the 
 ```tradeoff
 { "title": "When uncertain, stay available or stay correct?", "axis": { "left": "Availability-first (AP)", "right": "Correctness-first (CP)" }, "steps": [ { "label": "Always writable (KV store)", "detail": "The Dynamo-style KV store stays available no matter what, accepting eventual consistency and conflict resolution — a brief inconsistency in a cart is acceptable." }, { "label": "Tolerate then reconcile", "detail": "Embrace at-least-once delivery and idempotency so retries are safe, and verify after the fact — accept some divergence as long as it's caught and repaired." }, { "label": "Hold or reject when unsure", "detail": "When the system is uncertain (e.g. a provider timeout), it prefers to hold or reject rather than risk a wrong charge — fail safe toward correctness." }, { "label": "Provably correct, audited", "detail": "Money must never be lost, double-charged, or created; double-entry ledgers, idempotency, and reconciliation make conservation and auditability structural — correctness above all." } ] }
 ```
+
+## Common misconception
+
+**Myth: you can achieve true "exactly-once delivery," and an idempotency key makes the charge *run* only
+once.** Both halves are wrong, and believing them produces fragile, double-charging systems.
+
+True **exactly-once delivery** is impossible across an unreliable network (recall messaging): the sender
+can never be sure its message arrived, so it must either risk losing it (at-most-once) or risk a duplicate
+(at-least-once) — there's no third option at the delivery layer. What you actually engineer is
+**exactly-once *in effect*** = **at-least-once delivery + idempotent, atomically-deduped processing**. The
+charge request may be sent, lost, and retried **many** times; an idempotency key doesn't stop those
+retries from *running* — it guarantees the **net effect is applied once** (the first outcome is recorded
+and replayed). The dedup record must be written **atomically with** the effect, or a crash between charging
+and recording lets a retry double-charge anyway. So the goal isn't "the operation executes once" — it's
+"no matter how many times it executes, the money moves once." Confusing the two leads engineers to skip
+idempotency ("the network is usually fine") or to dedup non-atomically — and that's exactly how real
+double-charges happen.
 
 ## Self-test
 

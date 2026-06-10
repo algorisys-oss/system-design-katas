@@ -27,7 +27,9 @@ different situations.
 - **REST** — talk in **resources (nouns)**: `GET /users/42`, `GET /users/42/posts`. Uniform, cacheable,
   ubiquitous (recall the REST chapter).
 - **RPC** — talk in **actions (verbs/functions)**: call `getUser(42)` as if it were a local function.
-  Tight, efficient, action-oriented (gRPC is the modern form).
+  Tight, efficient, action-oriented. RPC is the general "call a remote function" style (JSON-RPC,
+  XML-RPC, Thrift, …); **gRPC** is its dominant modern, high-performance form, so we use it as the
+  representative here.
 - **GraphQL** — talk in **queries**: the *client* specifies exactly the fields it wants in one
   request, and the server returns precisely that shape.
 
@@ -45,8 +47,10 @@ different situations.
 
 **REST's pain points** (the opening scenario):
 - **Over-fetching** — an endpoint returns more fields than the screen needs (wasted bytes).
-- **Under-fetching** → **N+1 round trips** — one screen needs several resources, so the client makes
-  many calls (the seven-call profile).
+- **Under-fetching** → **multiple round trips (chattiness)** — one screen needs several resources, so
+  the client makes many separate calls (the seven-call profile). (This fixed-count fan-out is *not* the
+  classic **N+1** problem, which is fetching a list of N items and then making one query *per item* —
+  1 + N. We'll see GraphQL can reintroduce a true N+1 in its resolvers.)
 
 **GraphQL** fixes both: the client sends one query asking for exactly the fields across exactly the
 entities it needs, and gets one right-sized response. Great when many different clients (mobile vs web)
@@ -117,7 +121,7 @@ performance**, and **flexible client queries** respectively. Pick per boundary, 
   "question": "A mobile client over-fetches and makes many round trips per screen. The style designed to fix this is:",
   "options": ["More REST endpoints", "gRPC", "GraphQL (client requests exactly the fields it needs in one query)", "SOAP"],
   "answer": 2,
-  "explanation": "GraphQL lets the client specify the exact fields/entities in a single query, eliminating over-fetching and N+1 round trips."
+  "explanation": "GraphQL lets the client specify the exact fields/entities in a single query, eliminating over-fetching and the multiple round trips (chattiness) from under-fetching."
 }
 ```
 
@@ -135,15 +139,16 @@ performance**, and **flexible client queries** respectively. Pick per boundary, 
 Flip each card to check yourself, then move through the deck:
 
 ```flashcards
-{ "title": "API styles (REST/RPC/GraphQL) — key terms", "cards": [ { "front": "REST", "back": "A resource-oriented API style: talk in nouns over HTTP verbs (GET /users/42). Uniform, cacheable, and universal — the default for public web APIs." }, { "front": "RPC / gRPC", "back": "An action-oriented style: call a remote function as if local (getUser(42)). gRPC adds compact Protobuf over HTTP/2 with streaming and codegen — ideal for internal service-to-service calls." }, { "front": "GraphQL", "back": "A query style where the client specifies exactly the fields it wants across entities in one request, and the server returns precisely that shape." }, { "front": "Over-fetching", "back": "When an endpoint returns more fields than the screen needs, wasting bytes. GraphQL fixes it by letting the client name only the fields it wants." }, { "front": "Under-fetching (N+1 round trips)", "back": "When one screen needs several resources, forcing the client to make many calls. GraphQL collapses these into a single right-sized query." }, { "front": "GraphQL's new costs", "back": "It trades client-side fetching pain for harder caching (no URL-based HTTP caching), query-cost control (depth/complexity limits), and server complexity (resolvers, dataloaders for N+1)." } ] }
+{ "title": "API styles (REST/RPC/GraphQL) — key terms", "cards": [ { "front": "REST", "back": "A resource-oriented API style: talk in nouns over HTTP verbs (GET /users/42). Uniform, cacheable, and universal — the default for public web APIs." }, { "front": "RPC / gRPC", "back": "An action-oriented style: call a remote function as if local (getUser(42)). gRPC adds compact Protobuf over HTTP/2 with streaming and codegen — ideal for internal service-to-service calls." }, { "front": "GraphQL", "back": "A query style where the client specifies exactly the fields it wants across entities in one request, and the server returns precisely that shape." }, { "front": "Over-fetching", "back": "When an endpoint returns more fields than the screen needs, wasting bytes. GraphQL fixes it by letting the client name only the fields it wants." }, { "front": "Under-fetching (multiple round trips / chattiness)", "back": "When one screen needs several resources, forcing the client to make many separate calls. GraphQL collapses these into a single right-sized query. (Distinct from the classic N+1 pattern: fetching a list of N items, then one query per item.)" }, { "front": "GraphQL's new costs", "back": "It trades client-side fetching pain for harder caching (no URL-based HTTP caching), query-cost control (depth/complexity limits), and server complexity (resolvers, dataloaders for N+1)." } ] }
 ```
 
 ## Key takeaways
 
 - **REST** = resources + HTTP (simple, cacheable, universal); **RPC/gRPC** = call functions (compact,
   fast, internal); **GraphQL** = client picks exact fields (no over/under-fetch).
-- GraphQL fixes REST's **over-fetching and N+1 round trips** but adds **caching, query-cost, and
-  server complexity**.
+- GraphQL fixes REST's **over-fetching and multiple-round-trip chattiness** but adds **caching,
+  query-cost, and server complexity** (and can reintroduce a true N+1 in resolvers, solved by
+  dataloaders/batching).
 - gRPC excels at **internal high-volume** calls; it's a poor fit for public/browser APIs.
 - They're **complementary** — real systems mix them per boundary (public REST + internal gRPC +
   GraphQL aggregation).

@@ -87,9 +87,12 @@ Deletion isn't a single choice but a dial between keeping everything and removin
 ## In the wild
 
 - **CRUD is the backbone of admin panels, forms, and most REST resources** — frameworks scaffold it
-  automatically.
-- **Reads dominate:** most systems are read-heavy, which is why caching and indexing (coming up) focus
-  on reads.
+  automatically. **Ruby on Rails** (`scaffold`) and **Django** (its built-in admin) generate full
+  Create/Read/Update/Delete screens from a model definition, and tools like **PostgREST** and
+  **Hasura** auto-expose a database's tables as ready-made REST/GraphQL CRUD APIs with no hand-written
+  endpoint code.
+- **Reads dominate:** most web workloads are read-heavy — commonly on the order of ~90-99% reads to
+  ~1-10% writes — which is why caching and indexing (coming up) focus on reads.
 - **Soft deletes** are common in business systems for audit/recovery; **hard deletes** matter for
   privacy/compliance (e.g. "right to be forgotten" may *require* truly removing data).
 - **Bulk operations** (batch insert/update) are far more efficient than row-by-row — a frequent

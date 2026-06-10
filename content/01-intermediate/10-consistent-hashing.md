@@ -65,7 +65,7 @@ the whole point.
 ```reveal
 {
   "prompt": "Exactly why does `hash(key) % N` remap almost every key when N changes from 4 to 5?",
-  "answer": "Because the result depends on N for *every* key. hash(key) % 4 and hash(key) % 5 are unrelated values for almost all keys — a key that was on server 2 under %4 lands almost anywhere under %5. So changing N (adding/removing a server) doesn't move a small slice; it reassigns the vast majority of keys. For a cache that means ~80–90% instant misses (each missed key hits the database at once), and for a sharded store it means physically moving most of the data. Consistent hashing avoids this by making a key's owner depend only on its position relative to nearby servers on the ring — not on the total count N."
+  "answer": "Because the result depends on N for *every* key. hash(key) % 4 and hash(key) % 5 are unrelated values for almost all keys — a key that was on server 2 under %4 lands almost anywhere under %5. So changing N (adding/removing a server) doesn't move a small slice; it reassigns the vast majority of keys. For a cache that means ~75–80% instant misses (each missed key hits the database at once), and for a sharded store it means physically moving most of the data. Consistent hashing avoids this by making a key's owner depend only on its position relative to nearby servers on the ring — not on the total count N."
 }
 ```
 
@@ -90,7 +90,8 @@ not one neighbor.
 - **Distributed caches** (Memcached clients, Redis Cluster's 16,384 hash slots are a related idea) use
   consistent hashing so scaling the cache doesn't wipe it.
 - **Leaderless databases** (Cassandra, DynamoDB, Riak) place data on a consistent-hashing ring with
-  **vnodes** (Cassandra defaults to 256 vnodes/node) for balanced sharding + smooth rebalancing.
+  **vnodes** (Cassandra used 256 vnodes/node by default before 4.0, and lowered the default to 16 in
+  4.0+, since 256 made repair and bootstrap expensive) for balanced sharding + smooth rebalancing.
 - **Load balancers / CDNs** use it to route the same key to the same backend (cache locality) while
   tolerating node changes.
 - It's the standard answer to "how do I shard/partition so resizing is cheap" — directly solving the

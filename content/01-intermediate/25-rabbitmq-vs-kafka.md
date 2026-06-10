@@ -4,7 +4,7 @@ slug: rabbitmq-vs-kafka
 level: intermediate
 module: messaging-and-streaming
 order: 25
-reading_time_min: 13
+reading_time_min: 8
 concepts: [rabbitmq, kafka, broker, smart-broker, dumb-broker, routing, throughput]
 use_cases: []
 prerequisites: [message-queues, event-streaming-and-kafka, messaging-vs-streaming]
@@ -24,8 +24,10 @@ messaging-vs-streaming distinction you just learned.
 ## Mental model — smart broker (RabbitMQ) vs dumb broker / smart consumer (Kafka)
 
 - **RabbitMQ** is a **"smart broker"**: it does rich **routing** (exchanges, bindings, topics) and
-  pushes messages to consumers; once a message is acked, it's **gone**. Optimized for flexible task
-  delivery and per-message workflows.
+  pushes messages to consumers; with **classic queues**, once a message is acked it's **gone**.
+  Optimized for flexible task delivery and per-message workflows. (Since 3.9, RabbitMQ also ships
+  **Streams** — an append-only, offset-based, replayable log — which narrows the gap below; this
+  chapter compares **classic queues** vs Kafka.)
 - **Kafka** is a **"dumb broker, smart consumer"**: it just appends events to a **partitioned,
   retained log**; consumers **pull** and track their own **offsets**, and events stick around for
   replay. Optimized for high-throughput, durable, multi-consumer event streams.
@@ -61,9 +63,9 @@ messaging-vs-streaming distinction you just learned.
 ## Build it up — they can coexist
 
 Many systems run **both**: RabbitMQ (or SQS) for task queues and RPC-ish workflows, Kafka for the
-event backbone/analytics. Don't force one into the other's role — RabbitMQ as a long-term event store
-(no replay/retention model) or Kafka as a flexible per-message router with complex routing both fight
-the tool's design.
+event backbone/analytics. Don't force one into the other's role — RabbitMQ **classic queues** as a
+long-term event store (no replay/retention model — though RabbitMQ Streams narrows this) or Kafka as a
+flexible per-message router with complex routing both fight the tool's design.
 
 ```reveal
 {
@@ -81,6 +83,15 @@ the tool's design.
 - **Both together** is common — Kafka as the event spine, RabbitMQ/SQS for task distribution.
 - The choice follows the **messaging-vs-streaming** decision, plus routing-flexibility (RabbitMQ) vs
   retained-throughput (Kafka).
+
+**Concrete scale.** The throughput gap the chapter keeps asserting is real: a single Kafka partition
+can sustain on the order of **tens of MB/s**, and clusters scale linearly to **millions of
+messages/sec** — LinkedIn, which open-sourced Kafka, has reported processing on the order of
+**7 trillion messages/day** (roughly 4.5 million msgs/sec on average) across its Kafka deployment.
+RabbitMQ classic queues typically sustain **tens of thousands of messages/sec per queue** (lower with
+persistence and complex routing, higher for transient direct delivery) — plenty for task queues, but
+orders of magnitude below Kafka's retained-log firehose. (Sources: Kafka/Confluent docs and
+benchmarks; RabbitMQ docs; LinkedIn engineering posts.)
 
 ## Common misconception — "RabbitMQ and Kafka are competitors; pick the 'better' one"
 
@@ -130,7 +141,7 @@ Flip each card to check yourself, then move through the deck:
 { "title": "RabbitMQ vs Kafka — key terms", "cards": [
   { "front": "RabbitMQ (smart broker)", "back": "A message broker doing rich routing (exchanges, bindings, topics) and pushing to consumers; once a message is acked it is removed. Optimized for flexible task delivery and per-message workflows." },
   { "front": "Kafka (dumb broker, smart consumer)", "back": "An event-streaming log that appends events to a partitioned, retained store; consumers pull and track their own offsets, and events stick around for replay. Optimized for high-throughput durable streams." },
-  { "front": "Retention / replay", "back": "Kafka keeps events so late consumers, reprocessing, and replay work. RabbitMQ deletes messages on ack, with no built-in replay. Need history or replay points to Kafka." },
+  { "front": "Retention / replay", "back": "Kafka keeps events so late consumers, reprocessing, and replay work. RabbitMQ classic queues delete messages on ack, with no built-in replay (its newer Streams feature does add a replayable offset-based log). Need history or replay still points primarily to Kafka." },
   { "front": "Routing flexibility", "back": "RabbitMQ exchanges (direct, topic, fanout, headers) give sophisticated routing and per-message handling out of the box. Kafka routing is simpler: topic plus partition by key. Complex routing or priorities points to RabbitMQ." },
   { "front": "Delivery model (push vs pull)", "back": "RabbitMQ pushes messages and the broker tracks delivery. Kafka consumers pull and track their own offset. This affects backpressure and consumer control." },
   { "front": "They can coexist", "back": "Many systems run both: RabbitMQ (or SQS) for task queues and RPC-ish workflows, Kafka as the event backbone/analytics spine. Don't force one tool into the other's role." }

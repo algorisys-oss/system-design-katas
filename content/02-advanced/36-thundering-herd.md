@@ -23,6 +23,14 @@ thing at the same moment — and they turn a small event into an outage.
 
 ## Mental model — synchronized demand spikes overwhelm a resource
 
+Picture a **herd of cattle** crowded against a single narrow gate. While the gate stays shut they wait
+calmly, but the **instant** it swings open every animal charges it at once — and the gate (built to pass
+a steady trickle) is trampled. The gate isn't undersized for the *day's* traffic; it's undersized for
+the *synchronized* surge. The fixes map straight onto this image: **spread the herd out** so they arrive
+a few at a time (jitter), or **let one through and pass the result back** to the rest so the gate is only
+crossed once (coalescing). It's the same picture as everyone hitting refresh on a ticket site at the
+exact on-sale second.
+
 A **thundering herd** happens when **many clients/requests act simultaneously**, creating a sudden,
 synchronized spike that overwhelms a resource. The danger is the **synchronization** — the same work,
 all at once — not the total amount over time. Classic triggers:

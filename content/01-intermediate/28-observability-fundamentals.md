@@ -81,7 +81,7 @@ explain the specific failure. Each alone leaves a gap.
 ## In the wild
 
 - **Metrics:** Prometheus + Grafana, Datadog; track the "golden signals" (latency, traffic, errors,
-  saturation — next chapter).
+  saturation — covered in the metrics chapter).
 - **Logs:** structured logging → aggregation (ELK/OpenSearch, Loki, Splunk) for search across services.
 - **Traces:** Jaeger, Tempo, Datadog APM; **OpenTelemetry** instruments all three.
 - The workflow — **alert on a metric → open the trace → read correlated logs** — is how on-call

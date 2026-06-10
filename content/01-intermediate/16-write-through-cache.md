@@ -5,7 +5,7 @@ level: intermediate
 module: caching-patterns
 order: 16
 reading_time_min: 12
-concepts: [write-through, consistency, write-latency, freshness, write-around]
+concepts: [write-through, consistency, write-latency, freshness, durability, write-around, write-behind]
 use_cases: []
 prerequisites: [caching-patterns-overview, cache-aside]
 status: published
@@ -21,6 +21,10 @@ exactly that: every write goes to the cache *and* the database together, so a re
 value older than the last write. The price is on the write path.
 
 ## Mental model — write to both, synchronously
+
+Think of it like writing on a **carbon-copy form**: a single stroke of the pen fills both the
+customer copy (the cache) and the filed original (the database) at once — and you only hand over the
+receipt once *both* copies exist. There's no moment where one copy says something the other doesn't.
 
 In **write-through**, a write is applied to the **cache and the database at the same time
 (synchronously)** before it's acknowledged. The cache is always consistent with the database for any

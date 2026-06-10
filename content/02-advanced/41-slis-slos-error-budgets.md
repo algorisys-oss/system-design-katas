@@ -37,7 +37,8 @@ Three related terms, from measurement to decision:
 }
 ```
 
-- **SLI** = what you **measure** (availability, latency, error rate — the golden signals, recall).
+- **SLI** = what you **measure** (availability, latency, error rate — often drawn from the golden
+  signals (latency, errors) plus availability, recall).
 - **SLO** = the **target** for that SLI (your internal goal).
 - **SLA** = the **contract** with customers (legal/financial), deliberately **looser** than the SLO (so
   you breach the SLO — your warning line — well before the SLA).
@@ -80,8 +81,9 @@ It reframes reliability from "never fail" to "fail no more than X," which:
 ## Build it up — choosing SLOs and watching burn rate
 
 - **Pick SLIs that reflect user experience:** request success rate, latency percentiles (p99 — recall),
-  availability — the **golden signals**, measured from the **user's perspective** (not internal proxies
-  like CPU).
+  availability — measured from the **user's perspective** (not internal proxies like CPU). These often
+  draw on the **golden signals** (latency, errors — recall), but note availability/success-rate aren't
+  themselves part of that named four (latency/traffic/errors/saturation).
 - **Set SLOs realistically:** **100% is the wrong target** — it's impossibly expensive and users can't
   perceive it (the network/their device fails more often than that). Choose the level users actually
   need (often 99.9%–99.99%); each extra nine costs exponentially more (recall the nines).

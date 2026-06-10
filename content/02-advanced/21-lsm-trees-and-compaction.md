@@ -23,6 +23,14 @@ background "sort things out" process — is the **LSM tree** and **compaction**.
 
 ## Mental model — buffer in memory, append sorted files, merge later
 
+Think of a busy desk. Instead of refiling every incoming paper into the right cabinet drawer the
+moment it arrives (slow, lots of walking back and forth — the B-tree's in-place update), you drop
+each paper into an **inbox tray** as it lands (fast). When the tray is full, you staple it shut and
+set the stack aside — a sorted, never-to-be-edited pile. Stacks accumulate, so every so often you
+**tidy in batch**: merge several stacks into one, throw away superseded drafts and anything marked
+"discard," and end up with fewer, neater piles. Writing is effortless; the filing work is deferred
+and done in bulk later. That deferred batch tidy-up is **compaction**.
+
 A **Log-Structured Merge (LSM) tree** optimizes for writes by **never updating in place**:
 1. Writes go to an in-memory sorted structure, the **memtable** (and an append-only **write-ahead log**
    for durability — recall WAL/durability).

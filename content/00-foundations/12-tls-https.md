@@ -35,11 +35,15 @@ TLS combines two ideas:
   **private key** (secret). Anyone can encrypt with the public key, but only the private key can
   decrypt — used to securely agree on a shared secret.
 - **Symmetric crypto** for the actual data: fast encryption with that shared secret, used for the
-  rest of the session (asymmetric is slow, so it's only used to bootstrap).
+  rest of the session (asymmetric is slow, so it's only used to bootstrap). Each encrypted record
+  also carries an **authentication tag (MAC)** derived from the session keys, so any modification in
+  transit is detected and the connection is dropped — that's how TLS guarantees integrity.
 
 The **certificate** ties it together: a Certificate Authority (CA) the browser trusts digitally
 signs "this public key belongs to algoroq.io." Your browser ships with a list of trusted CAs and
-checks the signature — that's how it knows the sender is genuine.
+checks the signature — that's how it knows the sender is genuine. This is what defeats a
+**man-in-the-middle (MITM)** attack: an attacker on the network can relay traffic but can't present
+a CA-signed certificate for your bank's domain, so the impersonation is caught.
 
 ```sequence
 {
@@ -57,8 +61,10 @@ checks the signature — that's how it knows the sender is genuine.
 }
 ```
 
-This handshake costs extra round trips **on top of** TCP's — which is why HTTPS connections have a
-setup cost, and why connection reuse, TLS session resumption, and HTTP/2/3 matter for performance.
+This handshake costs extra round trips **on top of** TCP's. A full **TLS 1.2** handshake adds about
+**2 round trips**; **TLS 1.3** cut that to **1 round trip** (and **0-RTT** when resuming a prior
+session). That's why HTTPS connections have a setup cost, and why connection reuse, TLS session
+resumption, and HTTP/2/3 matter for performance.
 
 ```reveal
 {

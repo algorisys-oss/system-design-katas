@@ -49,7 +49,9 @@ three concerns dominate:
 
 - **Verify authenticity (signatures).** Anyone could POST to your public URL. Providers sign each
   payload (HMAC with a shared secret) and include the signature in a header; you recompute and
-  compare. Never trust an unverified webhook.
+  compare. Most providers (e.g. Stripe) sign a **timestamp + payload**, so reject **stale timestamps**
+  to defeat replayed (captured-and-resent) requests, and use a **constant-time comparison** when
+  checking the HMAC to avoid leaking it via timing attacks. Never trust an unverified webhook.
 - **Acknowledge fast, process async.** Return `200` quickly; do the real work in the background
   (recall sync-vs-async). If you do slow work inline, the provider may time out and **retry**, causing
   duplicates.
@@ -86,6 +88,10 @@ Webhooks shift work to the **receiver**:
 
 - **Payment providers (Stripe), GitHub, Slack, CI systems** all use webhooks for events
   (payment.succeeded, push, message) — with **signed payloads** and **documented retry policies**.
+  Concretely: **Stripe** retries failed deliveries with exponential backoff for up to **3 days**, and
+  expects a `2xx` response within about **20 seconds** or it treats the delivery as failed; **GitHub**
+  considers a delivery failed if your endpoint doesn't respond within **10 seconds** (per their
+  respective webhook docs).
 - The robust receiver pattern: **verify signature → enqueue → 200 → process idempotently in the
   background** (ties together async, idempotency, queues).
 - **Webhooks vs polling:** webhooks are efficient and near-real-time but put reliability on the

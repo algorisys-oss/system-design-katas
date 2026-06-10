@@ -4,7 +4,7 @@ slug: logical-clocks-and-vector-clocks
 level: advanced
 module: correctness-and-consensus
 order: 0
-reading_time_min: 17
+reading_time_min: 9
 concepts: [logical-clocks, lamport-timestamps, vector-clocks, causality, happens-before, clock-skew]
 use_cases: []
 prerequisites: [cap-theorem, replication-strategies]
@@ -16,9 +16,10 @@ status: published
 ## Hook — a motivating scenario
 
 Two servers in different datacenters each record an event with their wall-clock timestamp. Server A
-says `10:00:00.250`, server B says `10:00:00.180`. So B's event happened first… except the servers'
-clocks differ by 300ms, so actually A's happened first. In a distributed system you **cannot trust
-wall clocks** to order events. To know what *really* happened before what, you need **logical clocks**
+says `10:00:00.250`, server B says `10:00:00.180`. So B's event happened first… except A's clock is
+running ~300ms *ahead* of B's, so A's true time is earlier (≈`...-050`) despite its larger reading —
+A's event actually happened first. In a distributed system you **cannot trust wall clocks** to order
+events. To know what *really* happened before what, you need **logical clocks**
 — counters that capture **causality**, not time.
 
 ## Mental model — order by causality, not by wall time
@@ -84,9 +85,11 @@ So vector clocks can **distinguish causal from concurrent** — the thing Lampor
 
 ## In the wild
 
-- **Dynamo-style stores** (DynamoDB's ancestor, Riak, Cassandra in places) use **vector clocks (or
-  version vectors)** to detect concurrent writes and surface conflicts/siblings for resolution (recall
-  leaderless replication + conflict resolution).
+- **Dynamo-style stores** (the 2007 Dynamo paper, Riak) use **vector clocks (or version vectors)** to
+  detect concurrent writes and surface conflicts/siblings for resolution (recall leaderless replication
+  + conflict resolution). Not every Dynamo-lineage store made this choice: **Cassandra** instead
+  resolves conflicts with **last-write-wins on per-cell timestamps**, not causality tracking — simpler,
+  but with exactly the data-loss-under-skew risk described below.
 - **CRDTs** (a later chapter) build on causality tracking to merge automatically.
 - **Lamport clocks** underpin many algorithms needing a consistent total order; a *contrasting*
   approach is Spanner's **TrueTime**, which instead **bounds physical-clock uncertainty** (GPS + atomic

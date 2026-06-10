@@ -85,8 +85,9 @@ Keeping multiple versions isn't free:
 
 - **PostgreSQL, MySQL/InnoDB, Oracle, SQL Server (snapshot/RCSI), CockroachDB, and many NoSQL stores**
   use MVCC for snapshot isolation and non-blocking reads.
-- It pairs with **optimistic concurrency** (next chapter): MVCC detects write conflicts at commit
-  rather than locking up front.
+- It pairs naturally with **optimistic concurrency** (next chapter): write conflicts can be detected
+  at commit rather than locking up front — though MVCC is also commonly combined with pessimistic row
+  locks for writes (e.g. MySQL/InnoDB's `SELECT ... FOR UPDATE`).
 - **VACUUM/compaction tuning** and avoiding long/idle transactions are real operational concerns on
   MVCC databases.
 - It's the reason "readers don't block writers" is true for most modern SQL databases — a key
@@ -159,5 +160,6 @@ Flip each card to check yourself, then move through the deck:
 
 ## Up next
 
-MVCC underlies the optimistic approach to concurrency. Let's compare the two strategies head-on. Next:
-**Optimistic vs Pessimistic Locking**.
+MVCC pairs naturally with the optimistic approach (detect write conflicts at commit), though in
+practice it's also combined with pessimistic write locks. Let's compare the two strategies head-on.
+Next: **Optimistic vs Pessimistic Locking**.

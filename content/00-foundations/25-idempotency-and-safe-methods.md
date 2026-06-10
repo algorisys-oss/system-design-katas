@@ -87,7 +87,9 @@ again (a retry), it returns the **stored result instead of doing the work twice*
 ## In the wild
 
 - **Payment APIs (Stripe), message queues, and any "at-least-once" delivery** rely on idempotency
-  keys — because retries and duplicate deliveries are inevitable.
+  keys — because retries and duplicate deliveries are inevitable. Stripe, for example, stores each
+  idempotency key and its result for **24 hours**, so a retry within that window returns the saved
+  response instead of charging again.
 - **Client retry logic** should retry safe/idempotent requests freely (with backoff) and only retry
   non-idempotent ones if an idempotency key protects them.
 - **"Exactly-once" is usually "at-least-once delivery + idempotent processing":** you can't prevent

@@ -48,7 +48,9 @@ The fix for the opening scenario is to **move state out of the instance** into a
 instances see it:
 
 - **Sessions/auth** → a shared cache (Redis) or a signed token the client carries (recall
-  authn/authz).
+  authn/authz). The tradeoff: a signed token avoids a shared store but is hard to revoke before it
+  expires (and its payload is readable — only tamper-evident, not secret), whereas a shared session
+  store lets you revoke instantly at the cost of a lookup per request.
 - **Shopping cart / workflow state** → a database or cache, keyed by user/session ID.
 - **Uploaded file in progress** → object storage, not local disk.
 
@@ -91,7 +93,8 @@ pub/sub backplane — later chapters).
 - **Web/API tiers are designed stateless** so they sit behind a load balancer and autoscale —
   the standard architecture from the foundations course.
 - **Session stores** (Redis/Memcached) and **JWT tokens** are the two common ways to externalize auth
-  state.
+  state. A Redis `GET` for a session is typically sub-millisecond on an AZ-local instance, while a
+  compact JWT is usually a few hundred bytes to ~1 KB carried on every request.
 - **Stateful workloads** (databases, message brokers, real-time servers) get dedicated scaling
   approaches (replication, partitioning, backplanes) — most of this module.
 - **Twelve-Factor App** guidance: keep processes stateless and store state in backing services.

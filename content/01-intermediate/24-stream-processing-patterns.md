@@ -84,7 +84,11 @@ How aggressively you advance the watermark is a tunable dial between emitting fa
 ## In the wild
 
 - **Stream processors:** Kafka Streams, Apache Flink, Spark Structured Streaming, ksqlDB — they
-  provide windowing, stateful aggregation, joins, event-time + watermarks, and exactly-once.
+  provide windowing, stateful aggregation, joins, event-time + watermarks, and exactly-once. Flink
+  is built to scale to millions of events per second with sub-second processing latency; Spark
+  Structured Streaming defaults to micro-batching (a new batch triggered as fast as the previous one
+  finishes), with an optional fixed trigger interval. Watermark/allowed-lateness grace in production
+  is typically set on the order of seconds to a few minutes, depending on how out-of-order the source is.
 - **Use cases:** real-time dashboards/metrics, fraud/anomaly detection, alerting on windows,
   enrichment/ETL, recommendations, IoT sensor aggregation.
 - **Stream–stream and stream–table joins** combine streams with reference data in real time.

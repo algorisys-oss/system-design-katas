@@ -84,9 +84,13 @@ Drag the TTL dial to feel the freshness-vs-hit-rate trade:
 - **Event-driven invalidation** (via Kafka/pub-sub or DB change-data-capture) keeps distributed caches
   consistent across services.
 - **Versioned keys / cache-busting** are standard for CDNs and immutable assets (content-hash
-  filenames), and handy for app caches to avoid mass invalidation.
-- **`stale-while-revalidate`** is a real HTTP `Cache-Control` directive and a common app pattern for
-  hot, slightly-staleable data.
+  filenames): because the filename changes whenever the content does, you can safely set a one-year
+  cache lifetime — `Cache-Control: max-age=31536000, immutable` — and never invalidate it. The same
+  idea is handy for app caches to avoid mass invalidation.
+- **`stale-while-revalidate`** is a real HTTP `Cache-Control` directive (e.g.
+  `max-age=60, stale-while-revalidate=30` serves fresh for 60s, then serves stale up to 30s more
+  while refreshing) supported by CDNs like Fastly and Cloudflare; it's a common app pattern for hot,
+  slightly-staleable data.
 
 ## Common misconception — "just lower the TTL to keep data fresh"
 

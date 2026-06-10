@@ -23,6 +23,12 @@ completes, so you keep the **interesting** traces — not a random slice.
 
 ## Mental model — decide after you've seen the whole trace
 
+Think of a security camera system. **Head-based** sampling is like throwing away 99% of the footage *at
+the moment it's recorded* — so the one clip that shows the break-in is almost certainly gone. **Tail-based**
+sampling keeps everything briefly, then *after* the event reviews the recording and decides to archive the
+clips that show something interesting (the break-in, the alarm) and discards the boring empty-hallway ones.
+You only know which footage is worth keeping once you've seen what happened.
+
 The sampling decision can happen at two times:
 - **Head-based:** decide **at the start** of the trace (e.g. random 1%), before you know anything about
   it. Cheap and simple, but **blind** — it can't preferentially keep errors/slow traces because they

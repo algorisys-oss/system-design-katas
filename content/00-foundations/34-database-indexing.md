@@ -87,8 +87,10 @@ Indexing is a dial: how many indexes you add trades read speed against write cos
   columns used in `WHERE`/`JOIN`/`ORDER BY`.
 - **`EXPLAIN`/query plans** show whether a query uses an index or does a full scan — the first tool to
   reach for when a query is slow.
-- **B-trees** are the default index (great for ranges and equality); **hash indexes** suit exact-match
-  only; specialized indexes exist for text search, geo, JSON.
+- **B-trees** are the default index (great for ranges and equality): **PostgreSQL** and
+  **MySQL/InnoDB** both default to B-tree indexes, and InnoDB *clusters* the table on its primary key
+  (rows are stored in primary-key order). **Hash indexes** suit exact-match only; specialized indexes
+  exist for text search, geo, and JSON — e.g. PostgreSQL's **GIN/GiST** for full-text and geometric data.
 - **Over-indexing** is a real anti-pattern on write-heavy tables — each extra index taxes every write.
 
 ## Common misconception — "indexes make the database faster, so index everything"

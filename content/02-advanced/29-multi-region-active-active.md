@@ -7,7 +7,7 @@ order: 29
 reading_time_min: 15
 concepts: [active-active, active-passive, multi-region, write-conflicts, failover, data-residency]
 use_cases: []
-prerequisites: [global-load-balancing, replication-strategies, multi-region-consistency]
+prerequisites: [global-load-balancing, replication-strategies, cap-theorem]
 status: published
 ---
 
@@ -96,6 +96,12 @@ Where you land on the active-passive ↔ active-active dial is a trade between c
 
 - **Active-active stores:** DynamoDB Global Tables, Cassandra/ScyllaDB multi-DC, Cosmos DB multi-region
   writes, Redis Active-Active (CRDT-based) — all provide cross-region writes with conflict resolution.
+  DynamoDB Global Tables typically propagate a write to other regions in **under ~1 second**
+  (sub-second to single-digit seconds at the tail) per AWS's docs — which only works because that
+  replication is **asynchronous**: a synchronous round trip between, say, `us-east-1` and `eu-west-1`
+  costs roughly **70–90 ms** each way, so coordinating every write across the Atlantic would add that
+  latency to every request. That gap is exactly why active-active leans on async replication + conflict
+  resolution rather than synchronous cross-region coordination.
 - **Active-passive / single-writer** is common for strongly-consistent systems (a primary region with
   cross-region read replicas; failover promotes a replica).
 - **Write partitioning by home region** (each entity owned by one region) is a popular way to get

@@ -94,11 +94,14 @@ paying for global strong consistency.
 ## In the wild
 
 - **Linearizability:** coordination/config stores and consensus systems (etcd, ZooKeeper, Spanner
-  reads, a single-leader DB read on the leader) — where correctness demands it.
-- **Causal consistency:** the sweet spot for many collaborative/social systems (COPS, MongoDB causal
-  sessions) — strongest you can keep while staying available (recall CAP).
+  reads, or a single-leader DB read served by a leader that has confirmed it is still leader via a
+  read-index/lease) — where correctness demands it.
+- **Causal consistency:** the sweet spot for many collaborative/social systems (COPS, MongoDB
+  causally-consistent sessions, available since v3.6 in 2017) — strongest you can keep while staying
+  available (recall CAP).
 - **Eventual + client-centric guarantees:** Dynamo-style stores (DynamoDB, Cassandra) often add
-  read-your-writes/monotonic reads per session for sane UX.
+  read-your-writes/monotonic reads per session for sane UX. DynamoDB lets you pick per read: a
+  strongly-consistent read costs 2x the read capacity units of an eventually-consistent one.
 - **Tunable per operation:** quorum settings (R+W>N, recall) and "bounded staleness" let you pick a
   point on the spectrum per query.
 

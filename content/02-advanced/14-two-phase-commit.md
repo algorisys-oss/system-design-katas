@@ -24,6 +24,11 @@ it.
 
 ## Mental model — vote, then commit (a coordinator drives it)
 
+Think of a **wedding officiant**. First they ask each party in turn, "do you take...?" — and only
+once *every* party has said "I do" do they declare the union final. If anyone says no (or stays
+silent), there's no marriage. The officiant is the **coordinator**: a separate consent (vote) round
+for everyone, then a single binding declaration. 2PC works the same way.
+
 **2PC** makes multiple participants commit atomically via a **coordinator** and two phases:
 1. **Prepare (voting) phase:** the coordinator asks every participant "can you commit?" Each does the
    work tentatively, **durably writes it to a log**, and replies **YES (prepared)** or **NO**. Saying

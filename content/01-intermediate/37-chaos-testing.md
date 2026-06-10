@@ -81,8 +81,11 @@ Blast radius is a dial you turn up as confidence grows — trading safety for re
 
 ## In the wild
 
-- **Netflix's Chaos Monkey** (randomly kills production instances) popularized the practice; broader
-  tooling: Gremlin, AWS Fault Injection Service, LitmusChaos (Kubernetes).
+- **Netflix's Chaos Monkey** (randomly kills production instances) originated around 2011 and was
+  open-sourced as part of the **Simian Army** in 2012; it popularized the practice. Broader tooling:
+  Gremlin, AWS Fault Injection Service, LitmusChaos (Kubernetes).
+- A first production experiment typically starts with a tiny blast radius — on the order of **1% of
+  traffic or a single instance** — before scope is widened as confidence grows.
 - Mature orgs run **regular game days** and automated chaos in CI/staging (and carefully in prod).
 - It's the empirical test of **multi-AZ/region redundancy, failover, retries, circuit breakers** —
   proving the resilience you designed actually works.

@@ -20,6 +20,12 @@ home timeline). It pulls together sharding, replication, caching patterns, pub/s
 read-vs-write asymmetry — and forces the single most famous trade-off in feed design: **fan-out on
 write vs read**. Follow the method (requirements → estimate → design → trade-offs → failure modes).
 
+**Mental model:** think of two ways to run a newspaper. **Push** = pre-printing a personalized
+paper for every subscriber the moment news breaks, so when they wake up the paper is already on the
+doorstep (fast to read, but a lot of printing). **Pull** = the reader walks to the newsstand and the
+clerk assembles a custom paper from today's stories on demand (cheap to publish, slow at the
+counter). The whole chapter is about when to print ahead vs assemble on demand.
+
 ## 1 · Clarify requirements
 
 **Functional:** users **post**; users **follow** others; a user's **home feed** shows recent posts
@@ -172,6 +178,41 @@ The read path, step by step:
 - **The method again:** requirements → estimate (which exposed the read-heavy + celebrity tension) →
   HLD (push/pull hybrid + cache + shard) → trade-offs → failures. Reusable for any feed/timeline/
   fan-out system.
+
+## Show it in the wild
+
+This isn't a toy design — it's essentially how the big timelines work.
+
+- **Twitter's home timeline** is the canonical example. Twitter fans out on write for ordinary
+  accounts (a tweet is pushed into each follower's precomputed timeline, historically held in a
+  Redis-backed service) but **excludes high-follower accounts** from fan-out and merges their
+  tweets in at read time — exactly the hybrid above. At its scale this read path served on the
+  order of **hundreds of thousands of timeline reads per second**, vastly more than the write rate,
+  which is why precomputing reads pays off.
+- **Instagram** runs a similar precompute-and-merge feed and is famously built on a
+  **sharded PostgreSQL + Cassandra + memcached/Redis** stack, with feeds assembled from cached
+  lists of recent media IDs rather than a live join on every load.
+
+The lesson the real systems confirm: store the post **once**, precompute the common case, and
+special-case the few accounts whose follower count would otherwise blow up the write path.
+
+## Common Misconception
+
+**The myth:** "A feed is just a database query — on each page load you `SELECT` the recent posts
+from everyone the user follows, `ORDER BY` time, and return them. And anyway, fan-out on write is
+strictly the better design, so a real system just always pushes."
+
+Both halves are wrong. Running a live join across a user's (possibly thousands of) follows on
+**every** feed load is the pure **pull** model, and it does not survive a read-heavy product:
+~23k+ reads/sec each fanning out into many timeline lookups is far too slow and expensive. That's
+why feeds are **precomputed and cached**, not computed live.
+
+But the opposite over-correction — "just always fan out on write" — is equally wrong. Pushing every
+post into every follower's feed turns one celebrity post into **tens of millions** of writes, a
+bursty hotspot that overloads the system. Neither pure strategy works; the hybrid exists precisely
+because each extreme fails on the case the other handles well. Push is not "always better" — it's
+better **for the common case**, and the design deliberately switches to pull for the pathological
+one.
 
 ## Self-test
 

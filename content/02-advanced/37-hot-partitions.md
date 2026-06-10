@@ -89,7 +89,9 @@ concentration**, not the number of partitions. So the fixes target the **key**:
 
 ## In the wild
 
-- **DynamoDB** is famous for hot-partition throttling; mitigations: high-cardinality partition keys,
+- **DynamoDB** is famous for hot-partition throttling: a single physical partition is hard-capped at
+  **~3,000 read capacity units and ~1,000 write capacity units per second**, so one hot key can't exceed
+  that no matter how much table throughput you provision. Mitigations: high-cardinality partition keys,
   **write sharding (salting)**, caching (DAX), and **adaptive capacity / auto-split**.
 - **Kafka:** a hot partition key (or too few partitions) concentrates load on one partition/consumer
   (recall Kafka partitioning/ordering); choose keys to spread load.

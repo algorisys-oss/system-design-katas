@@ -50,7 +50,7 @@ spectrum (recall consistency models) applied across that expensive link:
   is partitioned (CP). Used only when correctness demands it (e.g. global financial invariants), often
   with clever clocks (Spanner's TrueTime).
 - **Bounded staleness:** reads are guaranteed to be **no more than X seconds (or N versions) behind** —
-  a tunable knob between strong and eventual (offered by Cosmos DB, DynamoDB global tables variants).
+  a tunable knob between strong and eventual (offered by Cosmos DB).
 - **Causal + session guarantees** (recall): give each user **read-your-writes / monotonic reads** so
   *their* experience is coherent across regions, without global coordination — often the practical
   sweet spot.
@@ -92,7 +92,8 @@ coherence across regions, just like the data.
   waits) — paying latency for correctness; **CockroachDB/YugabyteDB** use Raft per range across regions.
 - **Cosmos DB** offers **five tunable consistency levels** (strong → bounded staleness → session →
   consistent prefix → eventual) — a concrete realization of this spectrum; **DynamoDB Global Tables**
-  are eventually consistent multi-region.
+  replicate **eventually (last-writer-wins)** across regions (within a single region, DynamoDB still
+  offers strongly consistent reads).
 - **Causal/session guarantees** (read-your-writes, monotonic reads) are the common pragmatic choice for
   global apps (recall consistency models).
 - **Cross-region cache coherence** uses TTLs / event-based invalidation / versioned keys (recall cache

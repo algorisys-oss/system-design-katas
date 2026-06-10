@@ -56,7 +56,7 @@ switch to a healthy backup):
 ```reveal
 {
   "prompt": "How do you remove the database SPOF without losing consistency?",
-  "answer": "Run a primary plus one or more replicas (recall reads-vs-writes), ideally in different availability zones, with automatic failover: if the primary fails, a replica is promoted to primary and traffic redirects to it. Writes still funnel to a single primary at a time (preserving consistency), but the *role* is now redundant — no single machine's death is fatal. You accept a brief failover window and the complexity of promotion/replication lag, in exchange for surviving a node or zone loss. (Synchronous replication tightens consistency at some latency cost.)"
+  "answer": "Run a primary plus one or more replicas (recall reads-vs-writes), ideally in different availability zones, with automatic failover: if the primary fails, a replica is promoted to primary and traffic redirects to it. Writes still funnel to a single primary at a time (preserving consistency), but the *role* is now redundant — no single machine's death is fatal. You accept a brief failover window and the complexity of promotion/replication lag, in exchange for surviving a node or zone loss. One sharp caveat: with *asynchronous* replication a failover can actually lose recently-acknowledged writes — if the primary acknowledged a write but died before the replica received it, promoting that replica silently drops it (failover is not automatically lossless). That data-loss risk is precisely why *synchronous* replication is sometimes chosen: it guarantees a replica has the write before acking, at the cost of higher write latency."
 }
 ```
 

@@ -67,7 +67,7 @@ volatile memory) and the logs were cheap (cold object storage), all in your open
 - **Databases** are the **system of record** for structured, transactional data.
 - **Caches** (Redis/Memcached) hold hot, rebuildable data in memory — fast but not the source of truth.
 - **Storage tiers**: hot → infrequent-access → archive (e.g. Glacier) trade retrieval speed for cost,
-  matching the hot/warm/cold idea (next chapter).
+  matching the hot/warm/cold idea (covered soon in Hot, Warm & Cold Data).
 - **Ephemeral vs persistent disks** in the cloud: local instance storage vanishes when the VM stops;
   attached/network volumes persist — a frequent footgun.
 

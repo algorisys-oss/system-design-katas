@@ -68,8 +68,9 @@ Because HTTP is stateless, the client must prove identity on **every** request. 
 
 **Authorization models** you'll meet: **RBAC** (role-based — user has roles like `admin`, each role
 grants permissions) and **ABAC** (attribute-based — rules over attributes, e.g. "owner can edit own
-doc"). **OAuth 2.0** is the standard for *delegated* access ("Sign in with Google" / letting an app
-act on your behalf) — it issues tokens without sharing your password.
+doc"). **OAuth 2.0** is the standard for *delegated* access (letting an app act on your behalf
+without sharing your password) — it issues tokens, not your credentials. **OpenID Connect (OIDC)**
+builds on OAuth 2.0 to add login/identity, which is what powers "Sign in with Google".
 
 ```reveal
 {
@@ -83,7 +84,9 @@ act on your behalf) — it issues tokens without sharing your password.
 - **Sessions+cookies** suit classic web apps (and offer easy logout/revocation); **JWTs/bearer
   tokens** suit APIs, mobile, and service-to-service (stateless, scalable).
 - **OAuth 2.0 / OpenID Connect** power "Sign in with…" and third-party access without sharing
-  passwords.
+  passwords. Real tokens are deliberately short-lived: **Google OAuth access tokens default to
+  ~1 hour (3600s)**, paired with longer-lived refresh tokens — short lifetimes are how stateless
+  bearer tokens limit the revocation gap.
 - **The deny-by-default rule:** check authorization on **every** protected action, server-side —
   never rely on the UI hiding a button. The opening bug was a missing server-side authz check.
 - **Least privilege:** grant the minimum permissions needed; combine with RBAC for manageable access.

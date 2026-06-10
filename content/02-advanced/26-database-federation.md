@@ -27,6 +27,12 @@ domain** rather than by row.
 databases by function/domain** — each owning a distinct set of tables for a business area. Contrast with
 **sharding**, which splits **one table's rows** horizontally across nodes by a shard key.
 
+**Analogy:** picture one overstuffed office filing cabinet. *Federation* is splitting it into separate
+cabinets **per department** — an HR cabinet, a Finance cabinet, a Sales cabinet — each department owns
+its own cabinet with its own kinds of folders. *Sharding* is taking one **single** overflowing cabinet
+(say, all customer folders) and dividing **those same folders alphabetically** across several identical
+cabinets. Federation splits by *what kind of thing*; sharding splits one kind of thing by *which one*.
+
 - **Sharding** = same data shape, **split by row** (users 1–1M here, 1M–2M there).
 - **Federation** = different data, **split by feature** (users DB | products DB | orders DB).
 
@@ -88,6 +94,10 @@ They solve different problems and **compose**:
 
 ## In the wild
 
+- **Amazon** famously spent the 2000s decomposing one monolithic Oracle database into **hundreds of
+  service-owned databases** — each Amazon service got its own datastore, the canonical large-scale
+  example of functional partitioning (the same decomposition that later birthed DynamoDB and the
+  "two-pizza team" service model).
 - **Microservices** naturally federate: each service owns its database (database-per-service), which *is*
   functional partitioning (recall monoliths-vs-microservices).
 - **Federation precedes sharding** historically (a classic scaling step: split the monolith DB by

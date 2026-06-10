@@ -83,6 +83,12 @@ Despite the "vs," gateways and meshes **work together** — they handle differen
   plane — east-west.
 - A mesh provides **transparent mTLS, retries/timeouts/circuit breaking, load balancing, and
   observability** for internal calls — the resilience patterns (recall) as infrastructure.
+- **The cost is real and measurable:** each sidecar is a full proxy process running next to every
+  service instance, so a mesh adds **one extra proxy per instance** plus its CPU/memory footprint and a
+  per-hop latency cost (a request that crosses two services now passes through **2 extra proxies** — the
+  caller's egress sidecar and the callee's ingress sidecar). Lightweight meshes like Linkerd advertise
+  **sub-millisecond** added proxy latency at the median; that overhead, multiplied across every internal
+  hop, is why a mesh only pays off once you have many services.
 - **Both together** is the norm at scale; a mesh is **overkill for small systems** (use libraries / the
   gateway).
 

@@ -53,6 +53,13 @@ didn't finish. By committing the **business change and the inbox record in the s
 (same database), they're inseparable: either the message is fully processed *and* recorded, or neither.
 On redelivery, the inbox row makes the duplicate a no-op.
 
+One concurrency caveat: a naive **read-then-write** ("is the ID in the inbox? no → process") can be
+raced by two concurrent deliveries of the *same* ID — both pass the check before either inserts, and
+you double-process. Guard against this by putting a **UNIQUE / PRIMARY KEY on `message_id`** and
+enforcing dedup by *inserting first* and treating a **unique-constraint violation as "already
+processed"** (skip). That way the database serializes concurrent duplicates for you — the guarantee
+comes from the unique constraint, not from transaction atomicity alone.
+
 This is the consumer-side mirror of the outbox: **outbox = produce reliably (no lost events); inbox =
 consume idempotently (no double-processing)**. Together they turn **at-least-once delivery** into
 **effectively exactly-once processing** — the practical answer to "exactly-once" (recall: true
@@ -89,8 +96,11 @@ exactly-once delivery is impossible; you get at-least-once + idempotency).
   the **transactional outbox** (producer) to get **effectively-once** across the pipeline.
 - It's the same idea as **idempotency keys** in APIs/webhooks (recall) and payment processors' dedup —
   applied to message consumers.
-- Frameworks/messaging libraries often provide built-in dedup/idempotency support (e.g. inbox tables,
-  message-id dedup windows).
+- Frameworks/messaging libraries often provide built-in dedup/idempotency support: **MassTransit**
+  and **NServiceBus** ship an **inbox** table that stores processed message IDs and commits them in
+  the same transaction as your handler's writes. **Kafka** offers exactly-once semantics via its
+  transactional/idempotent-producer API (`enable.idempotence=true`, transactional read-process-write),
+  but that covers Kafka-to-Kafka topics — external side effects still need consumer-side dedup.
 - Combined picture: **outbox (no lost events) + inbox (no double-processing) + at-least-once broker =
   reliable, effectively-once event processing.**
 

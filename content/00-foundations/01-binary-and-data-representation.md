@@ -81,8 +81,8 @@ value — **integer overflow**. The fix is using a wider (64-bit) or unsigned ty
 - **Colors** on the web are 3 bytes — `#FF8800` is just red=255, green=136, blue=0.
 - **Storage units** are powers of two: 1 KiB = 1024 bytes, 1 MiB = 1024 KiB. (Disk vendors sell
   "1 TB" as 10¹² bytes, which is why your "1 TB" drive shows as ~931 GiB.)
-- **UTF-8** powers ~98% of the web; an emoji like 😀 is 4 bytes, which matters when a "280-character"
-  limit is really a *byte* limit.
+- **UTF-8** powers ~98% of the web; an emoji like 😀 is 4 bytes, which matters when a "character"
+  limit may actually count bytes or code points, not what a user perceives as characters.
 
 ```compare
 {

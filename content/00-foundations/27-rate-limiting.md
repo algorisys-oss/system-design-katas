@@ -98,7 +98,7 @@ Its biggest everyday value is protecting you from *accidents* and ensuring fairn
 ```reveal
 {
   "prompt": "Even with no attackers, why is rate limiting essential?",
-  "answer": "Most overload is accidental: a buggy retry loop, a runaway batch job, a popular customer's traffic spike, or a thundering herd after a cache expiry. Without limits, one caller can exhaust shared resources (DB connections, CPU) and degrade the service for everyone. Rate limiting enforces fairness and gives the system a safety valve — protecting availability regardless of intent. It's a reliability tool first, a security tool second."
+  "answer": "Most overload is accidental: a buggy retry loop, a runaway batch job, a popular customer's traffic spike, or a thundering herd (many clients retrying at once) after a cache expiry. Without limits, one caller can exhaust shared resources (DB connections, CPU) and degrade the service for everyone. Rate limiting enforces fairness and gives the system a safety valve — protecting availability regardless of intent. It's a reliability tool first, a security tool second."
 }
 ```
 

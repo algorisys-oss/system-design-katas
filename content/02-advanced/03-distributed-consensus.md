@@ -7,7 +7,7 @@ order: 3
 reading_time_min: 18
 concepts: [consensus, paxos, raft, replicated-log, quorum, leader, safety-liveness]
 use_cases: []
-prerequisites: [replication-strategies, cap-theorem, leader-election]
+prerequisites: [replication-strategies, cap-theorem]
 status: published
 ---
 

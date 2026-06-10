@@ -31,6 +31,11 @@ The leader serves a **term** (an ever-increasing number). When the leader stops 
 (recall health checks/heartbeats), followers time out, start a new **term**, and elect a new leader by
 majority vote. The term number is what makes stale leaders detectable.
 
+Think of it like an **on-call rotation**: exactly one person holds the pager. If they go silent, the
+team agrees on a new on-call holder and the old pager number is deactivated — so an ex-on-call who
+comes back online can't keep paging people as if they were still in charge. The "term" is which shift
+you're on; the "fencing token" is the deactivated old number.
+
 ```sequence
 {
   "title": "Failover: heartbeats stop → new term → new leader",
@@ -90,6 +95,11 @@ believing it's the leader, and try to act — **split-brain**. Two defenses:
 - **Fencing tokens** are standard in correct lock/lease usage (the "how to do distributed locking
   right" lesson — next chapter).
 - Pairs with **heartbeats** (detect failure) and **terms** (detect stale leaders).
+- **Concrete numbers:** etcd defaults to a **100 ms** heartbeat interval and a **1000 ms** election
+  timeout — i.e. a follower waits ~1 s of silence before campaigning. ZooKeeper's default `tickTime`
+  is **2000 ms**, and its session/leader timeouts are multiples of it. So detecting a dead leader and
+  failing over typically takes on the order of **a second to a few seconds**, dominated by the
+  election timeout, not the vote itself.
 
 ## Common misconception — "once a leader is elected, it stays the leader / electing one is the whole problem"
 

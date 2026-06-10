@@ -4,7 +4,7 @@ slug: how-the-internet-works
 level: foundations
 module: networking-fundamentals
 order: 6
-reading_time_min: 16
+reading_time_min: 9
 concepts: [osi, tcp-ip, layers, packets, encapsulation, protocols]
 use_cases: []
 prerequisites: [latency-numbers]

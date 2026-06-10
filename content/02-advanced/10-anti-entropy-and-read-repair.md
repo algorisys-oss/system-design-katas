@@ -66,8 +66,9 @@ delivers eventual consistency:
 
 - **Cassandra** does read repair (on reads) + scheduled **anti-entropy repair** (`nodetool repair`,
   Merkle-tree based) + hinted handoff — the textbook layered strategy.
-- **Dynamo/DynamoDB, Riak** similarly combine read repair, Merkle-tree anti-entropy, and hinted
-  handoff.
+- **Dynamo (the original 2007 paper), Riak** similarly combine read repair, Merkle-tree
+  anti-entropy, and hinted handoff. (DynamoDB the managed product is a separate system with an
+  undisclosed internal architecture — Amazon hasn't published these specifics for it.)
 - **Read repair** can be synchronous (block the read until repaired) or asynchronous (return then
   repair) — a latency/consistency tuning knob.
 - Anti-entropy is the reason these AP stores can promise **convergence** despite favoring availability

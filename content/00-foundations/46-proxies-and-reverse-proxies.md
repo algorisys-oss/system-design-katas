@@ -63,7 +63,9 @@ cross-cutting concerns (caching, compression, security).
 ## In the wild
 
 - **NGINX, HAProxy, Envoy** are reverse proxies commonly configured as load balancers, gateways, and
-  TLS terminators — often several roles at once.
+  TLS terminators — often several roles at once. NGINX alone fronts roughly a third of all websites
+  (~33% per W3Techs), and HTTPS reverse proxies typically listen on port 443 while talking plain
+  HTTP (port 80) to backends on the trusted internal network.
 - **Forward proxies** appear as corporate web filters, caching proxies, and privacy tools (and VPNs
   are a related idea).
 - **TLS termination at a reverse proxy** is a near-universal pattern: decrypt once at the edge, keep

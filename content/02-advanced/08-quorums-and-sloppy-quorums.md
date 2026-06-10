@@ -88,8 +88,11 @@ until handoff completes).
 
 ## In the wild
 
-- **Dynamo-style stores** (Amazon Dynamo, Cassandra, Riak, DynamoDB) use **tunable N/R/W quorums** and
+- **Dynamo-style stores** (Amazon Dynamo, Cassandra, Riak) use **tunable N/R/W quorums** and
   **sloppy quorums + hinted handoff** for high availability (recall leaderless replication).
+  *Note:* the original **Amazon Dynamo** (2007 paper) is leaderless with sloppy quorums + hinted
+  handoff; the AWS **DynamoDB** service is a separate, leader/Paxos-based design offering
+  strongly- or eventually-consistent reads — not tunable N/R/W or sloppy quorums.
 - **Per-operation tuning:** Cassandra exposes consistency levels (ONE, QUORUM, ALL, LOCAL_QUORUM) that
   map to R/W choices — letting you pick per query (recall consistency models' "tunable").
 - Quorums interplay with **read repair and anti-entropy** (next chapters) to fix stale replicas a

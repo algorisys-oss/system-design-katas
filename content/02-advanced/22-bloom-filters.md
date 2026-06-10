@@ -50,8 +50,8 @@ a "maybe" means fall back to the real check.
 
 The false-positive rate is **tunable** by sizing the bit array (m) and choosing the number of hash
 functions (k) for the expected number of items (n). More bits per item → fewer false positives. You
-trade **memory for accuracy**, and even very low rates (e.g. 1%) cost only a handful of **bits per
-item** — vastly less than storing the items themselves. Key properties:
+trade **memory for accuracy**: a ~1% false-positive rate needs only about **10 bits per item** (and
+~14–15 bits/item for ~0.1%) — vastly less than storing the items themselves. Key properties:
 - **No false negatives** (never misses a real member) — the property that makes it safe as a skip-check.
 - **No deletions** in a standard Bloom filter (clearing bits could break other items); variants like
   **counting Bloom filters** support deletes, and **cuckoo filters** offer deletes + better space.
@@ -72,7 +72,7 @@ Slide the bit-array size (bits per item) to feel the memory-vs-accuracy dial:
   "axis": { "left": "Fewer bits (less memory)", "right": "More bits (fewer false positives)" },
   "steps": [
     { "label": "Very few bits", "detail": "Smallest possible footprint, but the bit array saturates fast, so the false-positive rate climbs high — many 'maybe' answers fall through to the expensive real lookup." },
-    { "label": "Moderate bits", "detail": "A balanced point: a few bits per item already buys low false-positive rates (e.g. around 1%) while staying vastly smaller than storing the items themselves." },
+    { "label": "Moderate bits", "detail": "A balanced point: about 10 bits per item already buys a ~1% false-positive rate while staying vastly smaller than storing the items themselves." },
     { "label": "Many bits", "detail": "Very low false-positive rate, so almost every 'maybe' is a true hit, but you spend more memory per item for diminishing accuracy gains." }
   ]
 }

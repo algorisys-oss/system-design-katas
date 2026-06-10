@@ -89,6 +89,8 @@ Moving up the pyramid trades cheap, fast, precise feedback for higher realism at
 
 - **Pyramid in practice:** many unit (per PR, milliseconds), a solid integration layer (services + real
   DBs, often via containers like Testcontainers), and a **small** E2E set on critical journeys.
+  Google's widely-cited rule of thumb is roughly a **70/20/10** split — ~70% unit, ~20% integration,
+  ~10% E2E (from *Software Engineering at Google*).
 - **CI gates** on fast unit/integration tests for quick feedback; heavier E2E/load tests run on a
   schedule or pre-release.
 - **Contract testing** (e.g. Pact) is key for microservices to catch breaking API changes between

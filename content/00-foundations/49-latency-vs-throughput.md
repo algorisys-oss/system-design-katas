@@ -67,9 +67,10 @@ Optimizing one can hurt the other, so know which you're targeting:
 - **More parallelism / servers** raises throughput, but a single request's latency is unchanged (or
   worsens under contention).
 - **Caching / closer data / fewer hops** lowers latency directly.
-- **Little's Law (intuitively):** at capacity, more in-flight requests means each waits longer —
-  pushing throughput to the limit *raises* latency (queues form). Running near 100% utilization makes
-  tail latency explode.
+- **Little's Law** says concurrency = throughput × latency — an exact identity, not a prediction that
+  latency blows up. The blow-up comes from **queueing theory:** as utilization (ρ) approaches 1, wait
+  time scales like 1/(1−ρ), so pushing throughput to the limit makes queues form and latency explode.
+  Running near 100% utilization makes tail latency spike.
 
 ```reveal
 {
@@ -91,7 +92,10 @@ Drag the dial to see how tuning a system toward raw throughput trades against pe
 - **User-facing systems optimize latency** (especially the tail); **data pipelines/batch systems
   optimize throughput**.
 - **Tail-tolerant techniques:** timeouts, retries (idempotent!), hedged requests, and reducing fan-out
-  — keeping the slow 1% from dominating.
+  — keeping the slow 1% from dominating. Google's Dean & Barroso, *The Tail at Scale* (CACM 2013),
+  give the canonical example: if a server is slow (>1 s) on just 1% of requests, a single user request
+  that fans out to 100 such servers will wait on at least one slow server **63%** of the time
+  (1 − 0.99¹⁰⁰ ≈ 0.63) — tail latency dominates at fan-out, which is why hedged requests pay off.
 - **Run with headroom:** don't size systems for ~100% utilization; queues (and tail latency) blow up
   near saturation.
 

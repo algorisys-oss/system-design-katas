@@ -47,15 +47,17 @@ into the subtrees whose hashes differ**, ignoring matching subtrees entirely.
 ## Build it up — why it's logarithmic, and where it's used
 
 Because matching subtrees are pruned instantly (one hash comparison eliminates an entire branch), the
-work to locate a small number of differences is roughly **O(log n)** hash exchanges + the size of the
-actual differences — instead of O(n) to ship everything. With 100M keys, you compare a handful of
-hashes down one path rather than 100M items. That efficiency is exactly what makes **periodic
+work to locate **d** differences is roughly **O(d · log n)** hash exchanges — one path of depth
+~log n per differing region — plus the size of the actual differences. When divergence is small or
+localized (the differences share a path), this collapses to ~O(log n); either way it beats O(n) to
+ship everything. With 100M keys, you compare a handful of hashes down a few paths rather than 100M
+items. That efficiency is exactly what makes **periodic
 anti-entropy** practical (recall the previous chapter).
 
 ```reveal
 {
   "prompt": "Two replicas with 100M keys differ in just 3 keys. Why does a Merkle tree find them so cheaply, and what would naive comparison cost?",
-  "answer": "Naive comparison means transferring and diffing all 100M keys (or their hashes) between the replicas every time you check — O(n) network and CPU, prohibitively expensive to run periodically. A Merkle tree turns this into a top-down hash comparison: the replicas first exchange just their root hashes. If the 3 differing keys all sit under, say, the left subtree, then the right subtree's hash matches and is pruned in a single comparison — instantly eliminating ~50M keys from consideration. Recursing only into mismatched subtrees, each level roughly halves the search space while exchanging only the differing children's hashes, so you walk ~log(n) levels down the few paths that contain the 3 differences. The total cost is O(log n) hash exchanges plus the actual differing data (the 3 keys), instead of O(n). Crucially, identical regions cost essentially nothing (one matching hash prunes a whole branch), so the cost scales with the *amount of divergence*, not the dataset size. That's why Merkle-tree anti-entropy can routinely reconcile huge replicas: when little has diverged, repair is nearly free; when a lot has, you pay proportionally."
+  "answer": "Naive comparison means transferring and diffing all 100M keys (or their hashes) between the replicas every time you check — O(n) network and CPU, prohibitively expensive to run periodically. A Merkle tree turns this into a top-down hash comparison: the replicas first exchange just their root hashes. If the 3 differing keys all sit under, say, the left subtree, then the right subtree's hash matches and is pruned in a single comparison — instantly eliminating ~50M keys from consideration. Recursing only into mismatched subtrees, each level roughly halves the search space while exchanging only the differing children's hashes, so you walk ~log(n) levels down each of the few paths that contain the 3 differences. The total cost is O(d · log n) hash exchanges for d differing regions (here d is tiny, so effectively ~O(log n)) plus the actual differing data (the 3 keys), instead of O(n). Crucially, identical regions cost essentially nothing (one matching hash prunes a whole branch), so the cost scales with the *amount of divergence*, not the dataset size. That's why Merkle-tree anti-entropy can routinely reconcile huge replicas: when little has diverged, repair is nearly free; when a lot has, you pay proportionally."
 }
 ```
 

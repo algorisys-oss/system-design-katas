@@ -24,6 +24,10 @@ changes.
 
 ## Mental model — broadcast to all interested subscribers
 
+Think of a **radio station broadcasting on a frequency**: the station (the **publisher**) transmits
+without knowing who is tuned in, and every radio set to that frequency (a **subscriber**) receives the
+same broadcast independently. Tune a new radio in and the station does nothing different.
+
 In **publish/subscribe**, **publishers** emit messages to a **topic** without knowing who (if anyone)
 is listening; **subscribers** register interest in a topic and each receives **its own copy** of every
 message. It's **broadcast/fan-out**, versus a queue's deliver-to-one.
@@ -86,7 +90,9 @@ after the order, not in the same transaction).
 ## In the wild
 
 - **SNS→SQS (AWS), Google Pub/Sub, Redis Pub/Sub, NATS, MQTT, Kafka topics** provide pub/sub; many
-  pair a topic with per-subscriber queues.
+  pair a topic with per-subscriber queues. The scale is large: AWS SNS allows up to **12.5 million
+  subscriptions per standard topic**, and Google Cloud Pub/Sub retains unacknowledged messages for a
+  default of **7 days** so subscribers can catch up after an outage.
 - It's the foundation of **event-driven microservices** — services publish domain events; others react
   (recall it also powers **event-driven cache invalidation**).
 - **Fan-out** use cases: notifications, audit logging, analytics, search indexing, cache invalidation —

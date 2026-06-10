@@ -83,8 +83,13 @@ let each shine.
 ## In the wild
 
 - **Messaging (SQS, RabbitMQ):** background jobs, task queues, work distribution, request buffering.
+  The numbers reflect consume-and-delete: SQS holds a message for a **default 4-day retention (max
+  14 days)** — long enough to process a job, not to keep history.
 - **Streaming (Kafka, Kinesis, Pulsar):** activity/event pipelines, real-time analytics, log/metrics
-  aggregation, CDC, event sourcing, cross-service event buses.
+  aggregation, CDC, event sourcing, cross-service event buses. The numbers reflect retain-and-replay:
+  Kafka's **default topic retention is 7 days (168 hours)** and is commonly configured to weeks or
+  longer (or unbounded by size); Kinesis defaults to **24-hour retention, extendable up to 365 days**.
+  That retained window is exactly what lets new consumers read the past.
 - **Both together** is normal: jobs on a queue, events on a stream; sometimes a stream feeds
   per-consumer queues (recall pub/sub + queues).
 - Managed services blur the line, but the **retain-and-replay vs consume-and-delete** distinction

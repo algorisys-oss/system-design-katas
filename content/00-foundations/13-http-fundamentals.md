@@ -24,7 +24,8 @@ is the single most reused networking skill you'll have.
 
 HTTP is a simple, text-shaped conversation over the secure, reliable channel we just built: the
 client sends a **request**, the server sends back a **response**. Each has the same three parts: a
-**line** (what/verb + status), **headers** (metadata key-values), and an optional **body** (the data).
+**start line** (the request line carries method + path; the response line carries the status code),
+**headers** (metadata key-values), and an optional **body** (the data).
 
 ```sequence
 {

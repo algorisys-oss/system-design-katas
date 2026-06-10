@@ -73,7 +73,8 @@ can no longer block checkout — the event sits in the queue until email recover
 
 Async communication (usually via a **message queue or event stream** — the next module) buys you:
 - **Temporal decoupling** — sender and receiver needn't be up at the same time.
-- **Load leveling** — a queue absorbs spikes; consumers process at their own pace (backpressure).
+- **Load leveling** — a queue absorbs spikes so consumers process at their own pace; if the queue keeps
+  growing, separate **backpressure** mechanisms can slow the producer (its own later chapter).
 - **Fan-out** — one event, many independent consumers (email, analytics, search) without the producer
   knowing them.
 
@@ -94,9 +95,12 @@ But it costs you:
 ## In the wild
 
 - **Sync** is typically REST/gRPC request–response (next chapters); **async** is message queues and
-  event streams (the Messaging & Streaming module).
-- **Critical path stays sync, side effects go async** is the dominant pattern for resilient services
-  (payment sync; email/analytics/search-index async).
+  event streams (the Messaging & Streaming module) — e.g. **AWS SQS/SNS**, **RabbitMQ**, **Kafka**.
+- **Critical path stays sync, side effects go async** is the dominant pattern for resilient services:
+  Stripe/Shopify-style checkouts confirm payment synchronously, then emit an "order placed" event to a
+  queue (e.g. SQS or Kafka) for email/analytics/search-indexing consumers. The event is durable — **SQS
+  retains messages for 4 days by default (configurable from 1 minute up to 14 days)** — so a slow or
+  down consumer just picks it up later instead of blocking checkout.
 - Async enables **load leveling** and **fan-out**, and underpins event-driven architectures.
 - Async requires the resilience tooling from earlier: **idempotent consumers, retries, dead-letter
   queues** (upcoming) for duplicate/failed messages.

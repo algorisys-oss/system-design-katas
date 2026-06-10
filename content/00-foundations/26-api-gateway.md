@@ -7,7 +7,7 @@ order: 26
 reading_time_min: 13
 concepts: [api-gateway, reverse-proxy, cross-cutting-concerns, routing, microservices]
 use_cases: []
-prerequisites: [client-server-and-anatomy-of-a-request, authentication-vs-authorization, rate-limiting]
+prerequisites: [client-server-and-anatomy-of-a-request, authentication-vs-authorization]
 status: published
 ---
 
@@ -65,7 +65,8 @@ as services split or move behind it.
 ## In the wild
 
 - **Managed gateways:** AWS API Gateway, Kong, Apigee, NGINX, Envoy — plus cloud load balancers that
-  do gateway-like routing.
+  do gateway-like routing. To set expectations on scale: AWS API Gateway's default account-level
+  limit is **10,000 requests/second** with a **5,000-request burst** (raisable on request).
 - **BFF (Backend for Frontend):** a gateway variant tailored per client type (web vs mobile),
   aggregating multiple service calls into one response — covered in the advanced course.
 - **Gateway vs service mesh:** the gateway handles **north-south** traffic (clients → system); a

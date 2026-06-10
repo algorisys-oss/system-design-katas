@@ -20,6 +20,13 @@ requirements → estimation → high-level design → key low-level details → 
 reusing every concept from this course. Follow the *method* here; it's the same one you'll use for any
 design problem (and interview).
 
+## Mental model
+
+A URL shortener is essentially a giant, durable **hash map**: the key is the short code, the value is
+the long URL. Almost everything else is supporting cast — 99% of the work is making that one lookup
+*fast* and *always available*. Hold onto this picture; it's why the read path dominates every decision
+below.
+
 ## 1 · Clarify requirements
 
 Always start here (recall HLD vs LLD: requirements first).
@@ -125,8 +132,9 @@ The redirect (read) path, step by step:
 }
 ```
 
-**Base62** (`a-z A-Z 0-9`) keeps codes short: 62⁷ ≈ 3.5 trillion codes in just 7 characters — far more
-than our 5-year estimate needs. The store is a simple key-value mapping `short_code → long_url`
+**Base62** (`a-z A-Z 0-9`) keeps codes short: 62⁷ ≈ 3.5 trillion codes in just 7 characters. Our
+estimate creates ~1M URLs/day × 1,825 days ≈ **1.8 billion** codes over 5 years — so a 7-character
+base62 space (3.5 trillion) leaves roughly 2,000× headroom. The store is a simple key-value mapping `short_code → long_url`
 (+ metadata), so even a relational DB indexed on `short_code` works; the access pattern (lookup by
 key) also fits a key-value store perfectly.
 
@@ -147,6 +155,16 @@ The redirect status code is a dial between offloading work to clients and keepin
   { "label": "302 temporary", "detail": "Every visit hits your server, enabling click analytics and target changes, at the cost of more load. The right call when click analytics matter." }
 ] }
 ```
+
+## Show it in the wild
+
+Real shorteners confirm these choices. **TinyURL** and classic **bit.ly** links resolve via an HTTP
+**301 (permanent) redirect** — the cacheable option that offloads repeat visits from their servers.
+bit.ly leans the other way only when it wants measurement: its *tracking* links return **302/307**
+so every click flows through their analytics pipeline (bit.ly reports handling on the order of
+billions of clicks per month). The codes themselves are short base62-style strings (a `bit.ly/...`
+slug is typically ~7 characters), exactly the address-space math above. Same hash-map shape, same
+301-vs-302 dial we just reasoned through.
 
 ## 5 · Apply the trade-offs you've learned
 
@@ -178,6 +196,19 @@ Notice the shape of what we did — it's reusable for *any* design problem:
 4. **LLD**: the parts that matter (code generation, schema, 301 vs 302).
 5. **Trade-offs**: caching, scaling, CAP, SPOF — justified by the requirements and estimates.
 6. **Failure modes**: viral links, cache stampede, node loss — and how the design survives them.
+
+## Common Misconception
+
+**"A URL shortener is a hard scaling problem, so you must shard the database from day one."**
+
+This is the instinct that trips up most candidates — *"high traffic ⇒ shard everything."* But the
+estimation already dismantled it: ~1M new URLs/day is only ~0.9 TB over 5 years, which fits
+comfortably in a **single primary** (with replicas for read scaling), and the ~5,800 peak redirect
+QPS is absorbed almost entirely by a **cache**, not the database. Sharding adds real cost —
+cross-shard coordination, rebalancing, a harder unique-ID scheme — for a problem you don't have at
+this scale. The genuinely hard part isn't write/storage scale; it's keeping the **read path** fast
+and available (caching, replicas, stampede protection). Reach for sharding when the *numbers* demand
+it, not because the system "sounds big."
 
 ## Self-test
 

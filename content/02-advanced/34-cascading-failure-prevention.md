@@ -92,9 +92,11 @@ Containment lets the system **degrade gracefully** instead of collapsing totally
 
 - **Resilience libraries/infra:** Hystrix (historical), Resilience4j, Envoy/Istio (service mesh —
   recall) implement **circuit breaking, timeouts, retries with backoff, and bulkheads** — often as
-  infrastructure so every service gets them.
-- **Netflix** pioneered much of this (Hystrix, chaos engineering) precisely to prevent cascades in a
-  large microservice system.
+  infrastructure so every service gets them. Typical circuit-breaker config: open once the failure
+  rate over a rolling window crosses a threshold (Resilience4j defaults to **50%**), then stay open
+  for a cool-down before probing (Resilience4j defaults to **60s**) — tune these to your dependency.
+- **Netflix** pioneered much of this (Hystrix, chaos engineering) precisely to prevent cascades
+  across its **hundreds of microservices**.
 - These patterns combine with **load balancing health checks** (route away from failing instances),
   **rate limiting/quotas**, and **autoscaling** to keep systems up.
 - **Chaos engineering** (recall) is how you verify the containment actually works.

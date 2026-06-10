@@ -25,7 +25,14 @@ much to isolate** them.
 
 **Multi-tenancy** means a single application/infrastructure serves **multiple tenants** (customers/orgs)
 whose data and activity must stay **logically separated**. The core design axis is **isolation vs
-sharing**, a spectrum from fully shared to fully siloed:
+sharing**, a spectrum from fully shared to fully siloed.
+
+Think of it as **housing**: a **shared (pooled)** system is an **apartment building** — everyone shares
+the walls, plumbing, and electrical, so it's cheap and dense, but a noisy neighbor bleeds through and one
+burst pipe can flood several units. A **siloed** system is a row of **standalone houses** — each tenant
+gets private walls and utilities (strong isolation, no shared blast radius), but you pay to build and
+maintain N separate houses. Most real SaaS, like most real cities, is a **mix**: apartments for the many
+small tenants, detached houses for the few who need (and will pay for) privacy.
 
 ```compare
 {

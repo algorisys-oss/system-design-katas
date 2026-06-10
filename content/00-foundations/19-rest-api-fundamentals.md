@@ -38,7 +38,7 @@ A resource has a **URL** (its identity), and the method maps to an operation:
 {
   "options": [
     { "label": "Collection", "points": ["GET /users — list users", "POST /users — create a user", "Plural noun", "Operates on the set"] },
-    { "label": "Item", "points": ["GET /users/42 — read one", "PUT/PATCH /users/42 — update", "DELETE /users/42 — remove", "Operates on one resource"] }
+    { "label": "Item", "points": ["GET /users/42 — read one", "PUT /users/42 — full replace (idempotent)", "PATCH /users/42 — partial update (not necessarily idempotent)", "DELETE /users/42 — remove", "Operates on one resource"] }
   ]
 }
 ```
@@ -71,7 +71,9 @@ PUT/DELETE idempotent). Good REST design = consistent nouns + correct verbs + co
 ## In the wild
 
 - **Resource-oriented URLs + standard methods** are the backbone of most public web APIs (Stripe,
-  GitHub, etc.).
+  GitHub, etc.). GitHub's REST API, for example, paginates collection endpoints at **30 items per
+  page by default (max 100)** via a `per_page` query parameter — a concrete, predictable convention
+  that flows from modeling collections as resources.
 - **Statelessness** lets any server handle any request (load balancing/scaling) — REST inherits it
   from HTTP.
 - **REST isn't the only style:** GraphQL (client-specified queries) and gRPC (binary RPC, Protobuf)
@@ -123,7 +125,7 @@ consistency, cacheability, and tooling — not merely the use of JSON.
 Flip each card to check yourself, then move through the deck:
 
 ```flashcards
-{ "title": "REST API fundamentals — key terms", "cards": [ { "front": "Resource", "back": "The noun a REST API exposes (users, orders, products), each with a URL that names the thing. You act on it with standard HTTP verbs rather than custom action endpoints." }, { "front": "CRUD-to-method mapping", "back": "Create = POST /orders, Read = GET /orders/7, Update = PUT or PATCH /orders/7, Delete = DELETE /orders/7. The URL names the resource; the method says what you're doing to it." }, { "front": "Statelessness (in REST)", "back": "Each request is self-contained, carrying everything needed; no server-side session memory required. Inherited from HTTP, it lets any server handle any request, enabling load balancing and scaling." }, { "front": "Collection vs item URLs", "back": "A collection (GET /users, POST /users) uses a plural noun and operates on the set; an item (GET/PUT/PATCH/DELETE /users/42) operates on one resource." }, { "front": "Why JSON-over-HTTP is not REST", "back": "Returning JSON doesn't make an API RESTful. REST is the conventions: resource URLs, correct verbs, status codes, and statelessness — which buy predictability, cacheability, and tooling." }, { "front": "REST vs GraphQL vs gRPC", "back": "Alternatives to REST: GraphQL uses client-specified queries; gRPC is binary RPC over Protobuf. REST wins on simplicity, ubiquity, and cacheability." } ] }
+{ "title": "REST API fundamentals — key terms", "cards": [ { "front": "Resource", "back": "The noun a REST API exposes (users, orders, products), each with a URL that names the thing. You act on it with standard HTTP verbs rather than custom action endpoints." }, { "front": "CRUD-to-method mapping", "back": "Create = POST /orders, Read = GET /orders/7, Update = PUT (full replace, idempotent) or PATCH (partial change, not necessarily idempotent) /orders/7, Delete = DELETE /orders/7. The URL names the resource; the method says what you're doing to it." }, { "front": "Statelessness (in REST)", "back": "Each request is self-contained, carrying everything needed; no server-side session memory required. Inherited from HTTP, it lets any server handle any request, enabling load balancing and scaling." }, { "front": "Collection vs item URLs", "back": "A collection (GET /users, POST /users) uses a plural noun and operates on the set; an item (GET/PUT/PATCH/DELETE /users/42) operates on one resource." }, { "front": "Why JSON-over-HTTP is not REST", "back": "Returning JSON doesn't make an API RESTful. REST is the conventions: resource URLs, correct verbs, status codes, and statelessness — which buy predictability, cacheability, and tooling." }, { "front": "REST vs GraphQL vs gRPC", "back": "Alternatives to REST: GraphQL uses client-specified queries; gRPC is binary RPC over Protobuf. REST wins on simplicity, ubiquity, and cacheability." } ] }
 ```
 
 ## Key takeaways

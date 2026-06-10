@@ -74,9 +74,11 @@ Utilization, Saturation, Errors — targets resources.)
 ## In the wild
 
 - **Prometheus + Grafana** (pull-based, histograms, PromQL) and **Datadog/CloudWatch** are standard;
-  dashboards show the golden signals per service.
+  dashboards show the golden signals per service. Prometheus' default **scrape interval is 15s**, so
+  most metrics are sampled four times a minute.
 - **Alerting** ties to **SLOs/error budgets** (recall the nines): page when the error budget is
-  burning, not on every blip.
+  burning, not on every blip. A **99.9%** availability SLO leaves an error budget of only **~43 min
+  of downtime per 30-day month** — that small budget is what alerting protects.
 - **Histograms** power p50/p95/p99 latency; **counters** give rates; **gauges** track saturation
   (queue depth, connections).
 - Pairs with the other pillars: a metric **alert** → open the **trace** → read the **logs**.

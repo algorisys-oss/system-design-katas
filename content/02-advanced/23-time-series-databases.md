@@ -23,6 +23,10 @@ its design. A **time-series database (TSDB)** is built specifically for this sha
 
 ## Mental model — a database optimized for timestamped, append-only data
 
+Think of a TSDB like a **flight data recorder** (or a logbook you only ever append to): you keep
+writing new entries at the end, you read it back by time window ("what happened between 14:00 and
+14:30?"), and you never erase the middle of it or flip to an arbitrary page by its contents.
+
 A **time-series database** specializes in data that is **timestamped, mostly append-only, written in
 time order, and queried by time range** — metrics, IoT sensors, logs, financial ticks, events. It
 exploits the unique properties of that shape that a general DB can't assume:
@@ -45,8 +49,9 @@ exploits the unique properties of that shape that a general DB can't assume:
 - **Write-optimized storage:** TSDBs are typically **LSM-based or columnar append logs** (recall LSM) —
   perfect for high-ingest, time-ordered appends.
 - **Aggressive compression:** because timestamps are regular and adjacent values change little, TSDBs
-  use **delta** and **delta-of-delta** encoding + compression to store points in **a few bits each**
-  (e.g. Facebook's Gorilla) — orders of magnitude smaller than naive rows.
+  use **delta-of-delta** encoding for the regular **timestamps**, plus **XOR-based** compression for
+  the slowly-changing float **values** (e.g. Facebook's Gorilla), to store points in **a few bits
+  each** — orders of magnitude smaller than naive rows.
 - **Downsampling (rollups):** keep raw data short-term, but **pre-aggregate** older data into coarser
   resolution (1s → 1m → 1h averages) so long-range queries stay fast and storage shrinks — a
   time-series-specific form of the hot/warm/cold tiering you've seen.
@@ -141,7 +146,7 @@ Flip each card to check yourself, then move through the deck:
 { "title": "Time-series databases — key terms", "cards": [
   { "front": "Time-series database (TSDB)", "back": "A database specialized for timestamped, mostly append-only data written in time order and queried by time range — metrics, IoT, logs, financial ticks, events." },
   { "front": "The data shape a TSDB exploits", "back": "Writes are appends in roughly increasing time order; queries are time-range scans and aggregations; data ages out (recent is hot, old is rarely read and eventually deleted)." },
-  { "front": "Delta / delta-of-delta encoding", "back": "Compression that exploits regular timestamps and slowly-changing values to store each point in a few bits (e.g. Facebook's Gorilla) — far smaller than naive rows." },
+  { "front": "Delta-of-delta + XOR encoding", "back": "Compression that exploits regular timestamps (delta-of-delta encoding) and slowly-changing float values (XOR-based encoding) to store each point in a few bits (e.g. Facebook's Gorilla) — far smaller than naive rows." },
   { "front": "Downsampling (rollups)", "back": "Pre-aggregating older data into coarser resolution (1s to 1m to 1h averages) so long-range queries stay fast and storage shrinks — time-based hot/warm/cold tiering." },
   { "front": "Retention policy / TTL", "back": "Built-in automatic expiry of old data (e.g. raw after 7 days, rollups after 1 year), bounding storage to match data that is less valuable as it ages." },
   { "front": "Cardinality (and the cardinality bomb)", "back": "The number of distinct series (metric name + unique tag-value combos). High-cardinality tags like user_id multiply series into the millions, exploding memory and index — the #1 way to blow up a TSDB." }

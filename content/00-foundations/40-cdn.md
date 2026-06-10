@@ -4,7 +4,7 @@ slug: cdn
 level: foundations
 module: caching-fundamentals
 order: 40
-reading_time_min: 13
+reading_time_min: 6
 concepts: [cdn, edge, geo-distribution, static-content, origin, cache-headers]
 use_cases: []
 prerequisites: [caching-fundamentals, latency-numbers, dns]

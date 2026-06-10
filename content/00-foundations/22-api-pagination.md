@@ -47,6 +47,12 @@ next. Pagination does the same for data: return a **page** of N items plus a way
 value*" (e.g. `WHERE id > last_seen_id ORDER BY id LIMIT 20`), which uses an index directly — fast at
 any depth — and is stable because it anchors to a real item, not a position.
 
+One catch: keyset pagination needs a **unique, totally-ordered** sort key. If you paginate by a
+non-unique column (e.g. `created_at` with duplicate timestamps), `WHERE created_at > last` can
+silently skip or duplicate rows at the tie boundary. The fix is a composite tiebreaker — add a unique
+column like `id` as a secondary key and compare the tuple:
+`ORDER BY created_at, id` with `WHERE (created_at, id) > (last_ts, last_id)`.
+
 ```reveal
 {
   "prompt": "A feed adds new posts constantly. Why does cursor pagination avoid the 'I keep seeing the same post twice while scrolling' bug that offset pagination causes?",

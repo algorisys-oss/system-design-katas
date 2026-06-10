@@ -29,6 +29,12 @@ high-cardinality field; it's that systems like **metrics TSDBs index by the comb
 dimensions**, so cardinality **multiplies**: `endpoint × region × user_id` can be billions of distinct
 series.
 
+Think of a **filing cabinet** where every unique *combination* of dimension values needs its own
+drawer. With a handful of endpoints, regions, and status codes you have a few thousand drawers — a
+cabinet you can keep in your head. Add a column with millions of distinct values (user_id), and now
+every existing drawer splits into millions of new ones. The cabinet (the TSDB's index and memory)
+simply can't hold that many drawers, and it tips over.
+
 ```reveal
 {
   "prompt": "Why does cardinality multiply, and why is that combinatorial explosion the real danger rather than any single dimension?",
@@ -83,7 +89,9 @@ high-cardinality questions to the right one:
 - **The metrics-vs-logs-vs-traces choice** hinges on cardinality (recall observability fundamentals):
   metrics = low-cardinality aggregates; logs/traces/wide-events = high-cardinality detail.
 - **Observability 2.0 / wide events** (Honeycomb, columnar) is the modern way to keep high-cardinality
-  context queryable; **HyperLogLog** for distinct counts (Redis, Presto, BigQuery).
+  context queryable; **HyperLogLog** for distinct counts (Redis, Presto, BigQuery) — a Redis HLL uses
+  a fixed ~12 KB per counter to estimate distinct values with ~0.81% standard error, regardless of
+  whether it has seen thousands or billions of items.
 - **TSDB cardinality limits** and label hygiene are standard ops practice (recall TSDB cardinality
   bomb); **sampling** (tail-based) bounds trace cost.
 - It's why "I'll just add a label" is a famous footgun in metrics systems.

@@ -32,7 +32,7 @@ you can interpret any code you've never seen:
   "layers": [
     { "label": "1xx — Informational", "detail": "Interim responses (rare in app code), e.g. 100 Continue, 101 Switching Protocols.", "meta": "1xx" },
     { "label": "2xx — Success", "detail": "It worked. 200 OK, 201 Created, 204 No Content.", "meta": "2xx" },
-    { "label": "3xx — Redirection", "detail": "Go elsewhere. 301 Moved Permanently, 304 Not Modified (caching).", "meta": "3xx" },
+    { "label": "3xx — Redirection", "detail": "Go elsewhere. 301 Moved Permanently (cacheable), 302 Found (temporary redirect), 304 Not Modified (caching).", "meta": "3xx" },
     { "label": "4xx — Client error", "detail": "You messed up the request. 400, 401, 403, 404, 409, 422, 429.", "meta": "4xx" },
     { "label": "5xx — Server error", "detail": "The server messed up. 500, 502, 503, 504.", "meta": "5xx" }
   ]

@@ -5,7 +5,7 @@ level: advanced
 module: distributed-transactions
 order: 17
 reading_time_min: 14
-concepts: [transactional-outbox, dual-write-problem, atomicity, cdc, relay, at-least-once]
+concepts: [transactional-outbox, dual-write-problem, atomicity, cdc, relay, message-relay, idempotency, at-least-once]
 use_cases: []
 prerequisites: [saga-pattern, message-queues, database-transactions]
 status: published
@@ -22,6 +22,11 @@ versa), you get an order with no event, or an event for an order that doesn't ex
 **dual-write problem**, and the **transactional outbox** is its standard fix.
 
 ## Mental model — write the event into the DB, in the same transaction
+
+Think of an **office outbox tray**: you drop the letter into the same drawer in which you file the
+paperwork — one action — and the mail clerk (the relay) picks it up and posts it later. You never
+hand the letter to the post office and file the paperwork as two separate steps that could fall out
+of sync.
 
 The dual-write problem: you can't atomically write to **two different systems** (a database and a
 message broker) — there's no shared transaction (recall: no ACID across systems; 2PC is the blocking
@@ -99,6 +104,9 @@ How you implement the relay is a dial between operational simplicity and deliver
 
 - **Outbox + CDC (Debezium → Kafka)** is the standard reliable event-emission pattern in event-driven
   microservices; many frameworks (e.g. Axon, .NET, Spring) and platforms support it.
+- **Latency**: a polling publisher is bounded by its poll interval — commonly tuned to the order of
+  hundreds of milliseconds to a few seconds — whereas log-tailing CDC surfaces committed rows
+  typically within sub-second to low single-digit-second lag, with no per-poll query load on the DB.
 - It's the **reliable producer** for **sagas** (each step atomically commits its local change + emits
   the next event) and for keeping search indexes/caches in sync via change events.
 - **Pairs with the transactional inbox** (next chapter) on the consumer side for dedup/idempotent

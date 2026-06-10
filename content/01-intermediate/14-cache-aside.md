@@ -81,7 +81,11 @@ slower). This resilience is a big reason it's the default.
 ## In the wild
 
 - **Cache-aside + Redis/Memcached in front of a relational DB** is the single most common caching
-  setup in web apps.
+  setup in web apps. The payoff is the latency gap: an in-memory Redis/Memcached `GET` typically
+  returns in well under a millisecond (~0.1–1 ms), versus several to tens of milliseconds for a
+  comparable relational-DB query — which is why even modest hit ratios pay off.
+- Teams generally aim for a **high cache hit ratio on hot read-heavy keys** (often ~90–99%), so the
+  expensive DB read only happens on the rare miss.
 - The standard write rule is **"update DB, delete cache key"** (a.k.a. write-invalidate), with TTLs as
   a safety net.
 - Combined with **stampede protections** (warming, single-flight, jitter) for hot keys.

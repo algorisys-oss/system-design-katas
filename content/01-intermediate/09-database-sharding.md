@@ -24,7 +24,7 @@ ceiling is to **split the data itself across multiple databases**: **sharding**.
 
 Replication makes **copies of all the data**; sharding makes **slices of different data**. Each
 **shard** is an independent database holding a *subset* of the rows, with its own primary (and its own
-replicas). Users 1–1M live on shard A, 1M–2M on shard B, etc. Now each shard handles only its slice
+replicas). Users in the range `[0, 1M)` live on shard A, `[1M, 2M)` on shard B, etc. Now each shard handles only its slice
 of writes and storage — so total write capacity and storage scale with the number of shards.
 
 ```flow
@@ -80,7 +80,9 @@ Sharding scales writes, but you pay for it:
 ## In the wild
 
 - Sharding (a.k.a. **horizontal partitioning across machines**) powers the largest systems
-  (social graphs, messaging, time-series) where writes exceed one node.
+  (social graphs, messaging, time-series) where writes exceed one node — the wall it breaks through is
+  a single primary topping out at roughly low-tens-of-thousands of writes/sec and a few TB of data
+  before disk and write throughput run out.
 - **Sharding + replication combine:** each shard is itself replicated (primary + replicas) for
   HA/read-scaling — slices for write scale, copies for availability.
 - **Shard key choice is near-irreversible** — changing it later means re-sharding everything, so it's

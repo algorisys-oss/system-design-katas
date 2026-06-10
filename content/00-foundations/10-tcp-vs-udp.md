@@ -75,8 +75,13 @@ Map common features to the right transport:
 
 - **The web** runs on TCP (HTTP/1.1, HTTP/2) — correctness matters. **HTTP/3** moves to QUIC over
   **UDP** to kill head-of-line blocking and cut handshake latency, while keeping reliability per-stream.
+  The payoff is concrete: TCP needs a **1-RTT** handshake, and full **TLS 1.2** adds **2 more RTTs**
+  before any data flows; QUIC folds transport + **TLS 1.3** setup into **1 RTT** (and **0-RTT** on
+  resumption).
 - **Databases, message queues, SSH** → TCP (ordered, reliable streams).
-- **Games, VoIP, live streaming, DNS** → UDP (low latency, loss-tolerant).
+- **Games, VoIP, live streaming, DNS** → UDP (low latency, loss-tolerant). DNS uses UDP for small
+  queries but falls back to **TCP** for large responses (the truncated/TC bit triggers a retry) and
+  for zone transfers; DoT/DoH run over TCP too.
 - **Load balancers** distinguish **L4 (TCP/UDP)** vs **L7 (HTTP)** routing — the transport choice
   shapes what infrastructure can inspect.
 

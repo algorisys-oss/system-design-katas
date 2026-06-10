@@ -94,8 +94,11 @@ Architecture is a dial from simplicity to independence — slide it as your team
 
 ## In the wild
 
-- **Most successful systems started as monoliths** and extracted services as they scaled (Amazon,
-  Netflix, Shopify's modular monolith). Premature microservices is a common, expensive mistake.
+- **Most successful systems started as monoliths** and extracted services as they scaled. Amazon
+  spent the early-to-mid 2000s breaking up its `obidos` monolith into services; Netflix completed its
+  monolith-to-cloud migration around 2008–2016 and now runs on the order of **1,000+ microservices**;
+  Shopify deliberately kept a **modular ("majestic") monolith** — a multi-million-line Rails codebase —
+  rather than splitting into microservices. Premature microservices is a common, expensive mistake.
 - **Conway's Law** is real: independent teams want independently-deployable services; one team with
   one product is often better served by a monolith.
 - **The "distributed monolith" anti-pattern** — services that must deploy together — is the worst of

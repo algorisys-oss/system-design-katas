@@ -27,6 +27,11 @@ Replication keeps **multiple synchronized copies** of the same data on different
 common shape is **primary–replica** (a.k.a. leader–follower, formerly master–slave): one **primary**
 accepts writes and streams its changes to one or more **replicas** that apply them and serve reads.
 
+Think of a **head office that keeps the master ledger**: every change is written there, then the
+office mails photocopies of each new page to its branch offices. The branches can answer customer
+questions from their copies, but they're always a few pages behind whatever was *just* recorded
+downtown. One authoritative writer, many read copies, each lagging slightly — that's replication.
+
 This builds directly on reads-vs-writes: **reads scale by copying; writes must be coordinated**, so a
 single primary orders all writes while replicas fan out the reads.
 
@@ -93,7 +98,8 @@ Slide from fast-but-lossy to durable-but-slow to feel how the replication mode t
 ## In the wild
 
 - **Read-heavy systems** (most apps) put reads on replicas + caching; **managed databases** (RDS,
-  Cloud SQL) offer one-click replicas with automatic failover.
+  Cloud SQL) offer one-click **read replicas** that scale reads (asynchronous, no automatic
+  failover) — automatic failover is a separate feature provided by a Multi-AZ synchronous standby.
 - **Multi-AZ deployments** place the primary and a synchronous standby in different zones for HA;
   additional async read replicas scale reads.
 - **Replication ≠ backup** (recall the backups chapter): replicas copy mistakes instantly; you still

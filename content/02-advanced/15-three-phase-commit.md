@@ -4,7 +4,7 @@ slug: three-phase-commit
 level: advanced
 module: distributed-transactions
 order: 15
-reading_time_min: 13
+reading_time_min: 8
 concepts: [3pc, non-blocking-commit, timeouts, pre-commit, network-partition, consensus]
 use_cases: []
 prerequisites: [two-phase-commit, distributed-consensus]
@@ -80,6 +80,9 @@ coordinator to block on and majorities prevent split-brain.
 - **Consensus-backed commit** is the practical answer: distributed databases (Spanner, CockroachDB)
   use **Paxos/Raft** to replicate the commit decision, getting non-blocking atomic commit without
   split-brain.
+- **The cost is concrete:** 3PC's third phase adds one extra coordinator round trip versus 2PC, so
+  every commit pays an additional network RTT — on the order of **~1 ms intra-datacenter** but
+  **~50–150 ms cross-region** — for a protocol that still isn't partition-safe.
 - For services, **sagas + outbox** (next chapters) avoid distributed atomic commit altogether.
 - The lineage: **2PC (blocking) → 3PC (non-blocking but partition-unsafe) → consensus (the real fix)**.
 

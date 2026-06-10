@@ -75,7 +75,10 @@ history** (persisted, scrollable); **offline delivery** (messages wait until you
 ## 3 · The core challenge: routing across stateful connection servers
 
 A user's WebSocket lives on **one** connection server. To deliver A→B, you must reach B's server. The
-solution (recall real-time + pub/sub) is a **pub/sub backplane**:
+solution (recall real-time + pub/sub) is a **pub/sub backplane**. Think of it as a **telephone
+switchboard** (or a postal sorting center): the sender hands the message to the switchboard, which
+routes it to whichever of the 500 "offices" holds the recipient — senders never need to know which
+office that is.
 
 ```sequence
 {
@@ -122,6 +125,17 @@ or left in the durable store for the recipient to sync on reconnect if not.
 }
 ```
 
+### In the wild
+
+This isn't theoretical. **WhatsApp** famously pushed a single server to **~2–3 million concurrent
+connections** running **Erlang on FreeBSD**, and the platform now carries on the order of **~100
+billion messages/day** — which is exactly why our 100k-connections-per-server estimate is a
+*deliberately conservative* default (a real connection tier can pack far denser). **Discord** runs its
+real-time gateway on **Elixir/Erlang** for the same reason: the BEAM VM is built for millions of
+lightweight, long-lived connections. **Slack** and **Messenger** use the same shape — a stateful
+connection tier in front of a backplane that routes between servers. The pattern in this chapter
+(stateful sockets + backplane + persist-first store) is what these systems actually run.
+
 ## 5 · Apply the trade-offs you've learned
 
 - **Persist before/while delivering** so messages aren't lost (durability) — store every message in a
@@ -157,6 +171,24 @@ or left in the durable store for the recipient to sync on reconnect if not.
   celebrity case.
 - **Method recap:** requirements → estimate (connections + storage) → HLD (WebSockets + backplane +
   sharded store + offline queue) → trade-offs (durability, ordering, idempotency, fan-out) → failures.
+
+## Common misconception
+
+**"WebSockets alone solve chat — you just open a socket and broadcast every message to every
+connection server."** This is the most common wrong mental model, and it breaks the moment you have
+more than one connection server. WebSockets only give you a *bidirectional pipe between one client and
+one server*; they say nothing about how a message reaches a recipient whose socket lives on a
+*different* server. The naive "fix" — broadcast every message to all 500 servers and let each check
+whether it holds the recipient — turns every message into 500× the traffic and makes the fleet
+N×N-chatty; it collapses under load. The real answer is the **backplane plus a presence/routing
+registry**: the sending server publishes to the recipient's (or conversation's) channel, and *only*
+the server(s) actually subscribed for that recipient receive it. The socket is the last hop, not the
+routing layer.
+
+A second wrong model: **"at-least-once delivery means messages can be lost."** It means the opposite —
+the system keeps redelivering until it gets an ack, so a message can arrive *more than once* but is not
+silently dropped. Durability comes from persisting first; the client de-duplicates by message ID. Don't
+confuse "may duplicate" with "may lose."
 
 ## Self-test
 

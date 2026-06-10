@@ -103,8 +103,8 @@ Precision is not the point — and chasing it wastes time and hides the real dri
 
 ```reveal
 {
-  "prompt": "Two engineers estimate storage: one spends 10 minutes computing 17.6 TB, the other says '~20 TB' in 20 seconds. Why is the second often the better engineer here?",
-  "answer": "They both reach the same decision-relevant conclusion ('tens of TB/year — needs partitioning and tiering') but the second got there 30× faster and didn't fool themselves into false confidence. The inputs (DAU, bytes/record) are guesses that could easily be 2× off, so a 17.6 vs 20 TB distinction is meaningless precision. Good estimation optimizes for *fast, correct order of magnitude* and clearly-stated assumptions — not decimal places. Knowing what precision is worth is itself the skill."
+  "prompt": "Two engineers estimate storage: one spends 10 minutes computing 18.25 TB, the other says '~20 TB' in 20 seconds. Why is the second often the better engineer here?",
+  "answer": "They both reach the same decision-relevant conclusion ('tens of TB/year — needs partitioning and tiering') but the second got there 30× faster and didn't fool themselves into false confidence. The inputs (DAU, bytes/record) are guesses that could easily be 2× off, so a 18.25 vs 20 TB distinction is meaningless precision. Good estimation optimizes for *fast, correct order of magnitude* and clearly-stated assumptions — not decimal places. Knowing what precision is worth is itself the skill."
 }
 ```
 

@@ -95,7 +95,9 @@ Two ways to coordinate the steps:
 - **Microservice transactions** (order/checkout, travel booking, money movement) use sagas instead of
   2PC for availability + loose coupling (recall the 2PC chapter's reasoning).
 - **Orchestrators:** workflow engines like Temporal, Camunda, AWS Step Functions, Netflix Conductor
-  implement durable saga orchestration (state, retries, compensation).
+  implement durable saga orchestration (state, retries, compensation). AWS Step Functions **Standard**
+  workflows can run a single saga for up to **1 year** (365 days) — long enough to wait on slow steps
+  like a shipping confirmation — and durably persist every state transition for replay.
 - **Choreography** rides on event streams/queues (Kafka, recall pub/sub) — services emit and react to
   domain events.
 - Sagas pair tightly with the **transactional outbox** (next chapter) to reliably emit each step's

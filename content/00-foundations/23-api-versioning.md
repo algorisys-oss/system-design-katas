@@ -53,8 +53,10 @@ placements:
 ```
 
 URL versioning (`/v1/…`) is the most widespread because it's explicit and trivially routable. Header
-versioning keeps URLs stable but is easier to get wrong. Whatever you choose, the **process** matters
-more than the placement:
+versioning keeps URLs stable but is easier to get wrong. Two other placements you'll meet in the wild:
+a **query parameter** (Azure famously uses `?api-version=2024-01-01`) or a **custom header**
+(`X-API-Version: 2`) — so the URL-path-vs-Accept-header split isn't the whole menu. Whatever you
+choose, the **process** matters more than the placement:
 
 1. Ship `v2` alongside `v1` (don't delete `v1`).
 2. **Announce deprecation** of `v1` with a timeline; signal it (e.g. a `Deprecation`/`Sunset` header,
@@ -83,7 +85,9 @@ How freely you cut new versions is itself a dial — between fast iteration and 
 ## In the wild
 
 - **Most public APIs** use URL versioning (`/v1/`) and keep old versions alive for long, announced
-  deprecation windows (Stripe is famous for careful, dated versioning).
+  deprecation windows. **Stripe** uses date-stamped versions pinned per request (e.g.
+  `Stripe-Version: 2020-08-27`) and keeps old versions working for years; **GitHub's** REST API pins
+  versions via a header too (`X-GitHub-Api-Version: 2022-11-28`).
 - **Design for additive change first** — optional fields, tolerant readers — so most evolution needs
   *no* new version.
 - **Deprecation is a process, not a flip:** communicate, provide a window, monitor usage, then sunset.

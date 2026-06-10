@@ -25,11 +25,12 @@ in parallel; **Kappa** says "just do everything as a stream."
 
 These are **data-processing/analytics architectures** for combining real-time and historical
 computation over large data:
-- **Lambda architecture:** maintain **two parallel paths** — a **batch layer** (processes all
-  historical data accurately, recomputed periodically) and a **speed layer** (processes the live
-  stream for low-latency, approximate recent results). Queries **merge** the batch view (accurate, up
-  to the last batch) with the speed view (recent). You get freshness *and* accuracy — but you run and
-  maintain **two systems**.
+- **Lambda architecture:** canonically **three layers** — a **batch layer** (processes all
+  historical data accurately, recomputed periodically), a **serving layer** (indexes the batch layer's
+  views so they can be queried with low latency), and a **speed layer** (processes the live stream for
+  low-latency, approximate recent results). Queries **merge** the serving-layer (batch) view (accurate,
+  up to the last batch) with the speed-layer view (recent). You get freshness *and* accuracy — but you
+  run and maintain **multiple systems**.
 - **Kappa architecture:** drop the batch layer — treat **everything as a stream**. A **single stream
   processing pipeline** handles both real-time and historical data; to "reprocess," you **replay the
   event log** (recall Kafka retention/replay, event sourcing) through a new version of the stream job.

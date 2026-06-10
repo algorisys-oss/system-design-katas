@@ -94,7 +94,7 @@ Where a given piece of work should live is a dial along the proximity spectrum â
 ## In the wild
 
 - **Edge platforms:** Cloudflare Workers + KV/Durable Objects, AWS Lambda@Edge / CloudFront Functions,
-  Fastly Compute@Edge, Vercel/Netlify Edge Functions, Deno Deploy.
+  Fastly Compute, Vercel/Netlify Edge Functions, Deno Deploy.
 - **Common edge workloads:** auth/JWT verification, geo-routing & personalization, A/B testing,
   redirects/rewrites, WAF/bot mitigation, API response caching, image optimization, SSR/streaming at the
   edge.

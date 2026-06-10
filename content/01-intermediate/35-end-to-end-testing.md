@@ -76,8 +76,12 @@ Two close relatives of E2E:
 - **Smoke tests** gate deploys; **canary/blue-green** rollouts pair with smoke/synthetic checks before
   shifting traffic.
 - **Synthetic monitoring** (Datadog Synthetics, Checkly, Pingdom) continuously runs key journeys in
-  prod and alerts on failure — observability for user-facing flows.
-- The pyramid holds: **few** E2E tests on critical paths; rely on unit/integration for breadth.
+  prod and alerts on failure — typically scheduled every **1–5 minutes** from multiple regions —
+  observability for user-facing flows.
+- The pyramid holds: **few** E2E tests on critical paths; rely on unit/integration for breadth. The
+  classic test-pyramid guidance puts roughly **70% unit / 20% integration / 10% E2E**, and the cost
+  gap is stark — unit tests run in **milliseconds**, while a full E2E suite typically takes
+  **minutes to tens of minutes**.
 
 ## Common misconception — "E2E tests are the most important because they're the most realistic"
 

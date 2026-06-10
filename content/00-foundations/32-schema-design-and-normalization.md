@@ -22,6 +22,10 @@ fact, copied everywhere, drifts out of sync. **Normalization** is the discipline
 
 ## Mental model — store each fact once
 
+Think of it like a **contacts app**: a friend's phone number is stored once on their contact card,
+and every text and call simply **references** that card rather than re-typing the number — change the
+card once and every conversation is instantly correct.
+
 The core principle: **every fact lives in exactly one place.** A customer's address is a fact about
 the *customer*, so it belongs in the `customers` table — and an order just **references** the customer
 (by foreign key), rather than copying their details. Need the address on an order? **Join** to fetch
@@ -80,11 +84,15 @@ Schema design is a dial between write correctness and read speed — slide it pe
 
 ## In the wild
 
-- **OLTP (transactional) systems** lean normalized — correctness and cheap updates matter most.
-- **OLAP / analytics / data warehouses** lean denormalized (star schemas) — read/aggregate speed
-  matters most; data is mostly append-only.
-- **NoSQL document models** often denormalize by design — you embed related data to match an access
-  pattern and avoid joins, accepting duplication.
+- **OLTP (transactional) systems** — e.g. **PostgreSQL** and **MySQL** backing an order or billing
+  service — lean normalized, because correctness and cheap single-place updates matter most.
+- **OLAP / analytics / data warehouses** — e.g. **Snowflake**, **Amazon Redshift**, **Google
+  BigQuery** — lean denormalized into **star schemas**; read/aggregate speed matters most and data
+  is mostly append-only.
+- **NoSQL document models** — e.g. **MongoDB** and **Amazon DynamoDB** — often denormalize by
+  design: you embed related data to match an access pattern and avoid joins. DynamoDB serves such a
+  single-key read in **single-digit milliseconds** at scale, whereas the equivalent multi-table join
+  would be far slower.
 - **Caching and materialized views** are forms of controlled denormalization for read speed.
 
 ## Common misconception — "normalize everything, always" (or "denormalize for speed by default")

@@ -49,7 +49,10 @@ never the reverse — **dependency inversion**).
 - **Adapters** are the **technology-specific implementations**: a `PostgresOrderRepository` adapter
   implements the `OrderRepository` port; an `HttpController` adapter calls into the domain; a
   `StripePaymentAdapter` implements `PaymentGateway`. Two kinds: **driving** adapters (call the domain —
-  HTTP, CLI, tests) and **driven** adapters (the domain calls them — DB, broker, external APIs).
+  HTTP, CLI, tests) and **driven** adapters (the domain calls them — DB, broker, external APIs). These map
+  to two kinds of port: **driven (secondary) ports** are interfaces the domain *requires* and adapters
+  implement (`OrderRepository`, `PaymentGateway`); **driving (primary) ports** are the application/use-case
+  interfaces the domain *offers*, which driving adapters (an HTTP controller, a CLI) call into.
 - **The payoff:**
   - **Testability:** test the domain with **in-memory/mock adapters** — no database or web server needed
     (recall the test pyramid: fast, isolated unit/domain tests).
@@ -103,7 +106,8 @@ How much ports/adapters indirection to adopt is itself a dial, set by how much b
 ## In the wild
 
 - **Hexagonal / Clean / Onion architecture** and **DDD** are widely used for services with significant
-  business logic; frameworks and templates exist across languages (Spring, .NET, Go).
+  business logic; frameworks and templates exist across languages (Spring, .NET, Go). The pattern dates to
+  Alistair Cockburn's **2005** "Hexagonal Architecture" article, which coined the *ports & adapters* framing.
 - **The domain core + ports** make services **highly testable** (in-memory adapters — recall test
   pyramid) and **infrastructure-agnostic** (swap DBs/brokers/API styles via adapters — recall polyglot,
   API styles).

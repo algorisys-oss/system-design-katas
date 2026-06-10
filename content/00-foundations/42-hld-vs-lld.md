@@ -66,7 +66,15 @@ The reliable approach is **outside-in**:
 - **Interviews** explicitly test HLD ("design X") and sometimes LLD ("design the rate limiter
   class"); knowing which is being asked is half the battle.
 - **Design docs** typically lead with HLD (context, components, data flow, trade-offs), then LLD for
-  the risky parts — so reviewers grasp the shape before the details.
+  the risky parts — so reviewers grasp the shape before the details. **Amazon** famously replaced
+  slide decks with a **6-page narrative memo** read in silence for the first ~15–20 minutes of the
+  meeting; the early pages set the high-level shape before any low-level detail.
+- **A named HLD→LLD split:** **Twitter's** home timeline starts as an HLD box — a "fanout service"
+  between the write path and a per-user timeline cache. Zoom in and that one box becomes LLD: on each
+  tweet, fan out the tweet id into each follower's cached timeline (Redis lists). The catch surfaces
+  only at LLD altitude — a celebrity with ~100M+ followers would mean 100M+ cache writes per tweet,
+  so those accounts are handled by fanout-on-read (merged at read time) instead. The HLD box hid a
+  decision that only the LLD made visible.
 - **The course so far is your HLD vocabulary:** load balancers, caches, replicas, queues, CDNs —
   HLD is composing these into a data flow that meets requirements.
 - **Capstones** (like the one ending this module) practice exactly this: requirements → HLD → key LLD.

@@ -4,7 +4,7 @@ slug: memory-hierarchy
 level: foundations
 module: computing-fundamentals
 order: 2
-reading_time_min: 16
+reading_time_min: 8
 concepts: [registers, cache, ram, disk, locality, cache-line, latency-tiers]
 use_cases: []
 prerequisites: [how-computers-work, binary-and-data-representation]

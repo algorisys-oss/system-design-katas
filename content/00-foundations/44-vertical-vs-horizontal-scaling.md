@@ -75,9 +75,12 @@ Real systems combine both, in a typical order:
 ## In the wild
 
 - **Cloud auto-scaling** adds/removes stateless instances based on load (elasticity) — pay for what
-  you use, handle spikes automatically.
+  you use, handle spikes automatically. **AWS Auto Scaling groups**, for example, launch and
+  terminate EC2 instances against a target metric (e.g. average CPU).
 - **Vertical scaling is the easy first lever** and remains common for databases and components that
-  are hard to distribute.
+  are hard to distribute — but the ceiling is real. Even AWS's largest single instances top out:
+  the **EC2 High Memory U7i** instances reach roughly **896 vCPUs and 32 TiB of RAM**, and once a
+  workload outgrows that, "bigger" is no longer an option — you must go horizontal.
 - **Horizontal scaling brings fault tolerance for free:** if one of many instances dies, the load
   balancer routes around it (no single point of failure for that tier) — the topic of the next chapter.
 - **Cost shape differs:** big machines get disproportionately expensive (vertical), while commodity

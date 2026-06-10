@@ -76,6 +76,10 @@ Schema formats like Protobuf are designed for this: add a new *optional* field w
 and old readers safely ignore it while new readers use it — no coordinated, simultaneous deploy
 needed.
 
+The rule that makes this safe: **never reuse or retype an existing field number** — mark removed ones
+as `reserved`. Add new fields with new numbers only. Reusing or renumbering a tag silently corrupts
+data across versions, because the wire format identifies fields by number, not name.
+
 ```reveal
 {
   "prompt": "Service A adds a new field to a message. Service B (older) hasn't been redeployed. Why does this break with a strict format but not with Protobuf's rules?",

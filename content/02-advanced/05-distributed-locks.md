@@ -95,9 +95,14 @@ The "why" behind the lock sets how much machinery you need — slide from pure e
 ## In the wild
 
 - **Consensus-backed locks** (ZooKeeper, etcd) are the safe choice for correctness-critical mutual
-  exclusion (and underpin leader election); they provide ordered, fenceable acquisition.
+  exclusion (and underpin leader election); they provide ordered, fenceable acquisition. etcd grants
+  leases with a **TTL expressed in seconds** (clients renew via `KeepAlive`); ZooKeeper's ephemeral
+  znodes vanish after a session expires, governed by the configured session timeout (whose lower bound
+  is `2 × tickTime`, with `tickTime` defaulting to **2000 ms**).
 - **Redis locks** (`SET NX PX`, or Redlock) are common and fine for **efficiency** locks; pair with
-  **fencing tokens** at the resource if you push toward correctness.
+  **fencing tokens** at the resource if you push toward correctness. Because Redis replication is
+  asynchronous, a primary failover (driven by Sentinel's `down-after-milliseconds`, default **30000 ms**)
+  can lose a just-acquired lock that hadn't yet replicated — another client can then hold the "same" lock.
 - **Databases** can provide locks (advisory locks, `SELECT ... FOR UPDATE`) within their transaction
   scope — often the simplest correct option when the resource *is* the database (recall transactions).
 - The deciding question is always **efficiency vs correctness** — it determines how much rigor (fencing,

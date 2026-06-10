@@ -23,7 +23,10 @@ strategies.
 
 ## Mental model — how many places can accept a write?
 
-The strategies differ on one axis: **who may accept writes.**
+The strategies differ on one axis: **who may accept writes.** Picture a bank: **single-leader** is
+one cashier ringing up every transaction in order; **multi-leader** is several branch offices each
+taking deposits locally, then reconciling their books later; **leaderless** is any teller serving you,
+with several cross-checking (a quorum) to agree on your balance.
 
 ```compare
 {
@@ -64,7 +67,10 @@ one node, so reads see the latest **completed** write (under a strict quorum —
 partial failures, or sloppy quorums can still surface stale/conflicting values). This gives **high
 availability** and a per-operation **consistency/latency dial** (recall CAP's tunable consistency), at
 the cost of client/coordinator logic and techniques like read-repair to reconcile stale replicas
-(advanced course).
+(advanced course). Leaderless doesn't escape conflicts either: when two clients write the same key
+concurrently, it needs the **same resolution policies as multi-leader** (version vectors, last-write-
+wins, or CRDTs), and background **anti-entropy** plus read-repair heal divergence between replicas
+over time.
 
 ```reveal
 {

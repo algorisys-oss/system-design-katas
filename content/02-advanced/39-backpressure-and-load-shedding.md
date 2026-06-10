@@ -23,6 +23,12 @@ all the work, the goal is to **fail in a controlled way**, not collapse.
 
 ## Mental model — two responses to "more work than capacity"
 
+Picture a **busy restaurant on a packed night**. **Backpressure** is the host slowing the seating
+pipe — holding tables, pacing how fast orders reach the kitchen — until the line cooks catch up; you
+*can* throttle your own front door. **Load shedding** is turning walk-ins away at the door (a polite
+"we're full, try later") and protecting your reservations, because you **can't** tell the street to
+send fewer hungry people. Same overload, two levers: slow what you control, drop what you can't.
+
 When inflow exceeds what you can process, you have two complementary tools:
 - **Backpressure:** **signal the producer to slow down** (or stop) until you catch up — push the
   overload *upstream* to the source. Flow control: the consumer's capacity governs the producer's rate.
@@ -83,7 +89,10 @@ When you can't apply backpressure (e.g. external users on the open internet won'
 
 - **TCP flow control** and **reactive streams** (Project Reactor, RxJava, Akka Streams, gRPC streaming)
   implement **backpressure** as a first-class concept; **bounded queues/thread pools** are the basic
-  mechanism.
+  mechanism. In Reactive Streams a subscriber signals demand via `request(n)`, capping in-flight items
+  to **N**; **HTTP/2** (which gRPC rides on) bounds each stream with a flow-control window whose default
+  initial size is **65,535 bytes (64 KiB)** per RFC 7540/9113 — the receiver won't accept more until it
+  sends `WINDOW_UPDATE`.
 - **Load shedding** is standard at gateways/load balancers and in services (return **503** when
   overloaded); **prioritized shedding** protects critical traffic (Google/Envoy-style adaptive
   shedding).

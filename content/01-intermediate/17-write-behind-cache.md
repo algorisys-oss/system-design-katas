@@ -85,8 +85,11 @@ Tuning the flush interval slides write-behind between maximum throughput and max
 
 - **High-frequency counters/metrics** (views, likes, rate counters), **analytics/event buffering**,
   and **last-seen/heartbeat** timestamps are classic write-behind use cases.
-- **Redis + periodic flush**, or purpose-built write-back caches; OS page caches and disk controllers
-  use write-back internally (with the same durability caveat → `fsync`).
+- **Redis + periodic flush**, or purpose-built write-back caches. Redis's own default `appendfsync
+  everysec` is the same idea applied to its AOF: it flushes to disk **once per second**, so a crash
+  can lose up to **~1 second** of acknowledged writes — the canonical write-behind loss window. OS
+  page caches and disk controllers use write-back internally too (with the same durability caveat →
+  `fsync`).
 - Made safer with **durable/replicated buffers** — at which point it resembles a **queue + consumer**
   (the messaging module).
 - Avoided for **financial/critical** data, where write-through or direct durable writes are required.

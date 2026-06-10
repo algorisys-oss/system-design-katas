@@ -30,6 +30,12 @@ store; reads are served from one or more **denormalized read models (projections
 the queries they answer. The read side is kept in sync with the write side **asynchronously** (often via
 events — recall pub/sub, outbox, event sourcing).
 
+Think of a restaurant: the **kitchen** (write side) is laid out to *prepare dishes correctly and
+consistently* — raw ingredients, prep stations, recipes — while the **menu and display boards** (read
+side) are shaped for *diners to browse quickly*: denormalized, grouped, photographed, nothing like the
+kitchen's internal layout. The two are deliberately different, and the menu is brought in sync **after**
+each dish is ready, not in lockstep with every chop and stir.
+
 ```flow
 {
   "title": "CQRS: separate write and read paths",
@@ -85,7 +91,8 @@ How fresh the read side is depends on how synchronously you project — a dial f
 
 - **CQRS pairs naturally with event sourcing** (previous chapter): the events are the write model's
   output, and **projections** build the read models by consuming them — rebuildable, multiple views.
-  But **CQRS doesn't require event sourcing** (you can project from a normal write DB via CDC/events),
+  But **CQRS doesn't require event sourcing** (you can project from a normal write DB via Change Data
+  Capture (CDC — streaming the write DB's row-level changes as events)),
   and event sourcing doesn't strictly require CQRS (though it nearly always uses it for querying).
 - **When to use:** read and write workloads are **very different/asymmetric**, you need **multiple
   specialized read models**, or read/write scaling differs hugely. **When not to:** simple CRUD where
@@ -108,6 +115,10 @@ How fresh the read side is depends on how synchronously you project — a dial f
   lightweight steps toward CQRS (separate read-optimized copies).
 - Many systems apply CQRS **partially** — only for the few areas with strong read/write asymmetry —
   rather than everywhere.
+- The pattern is documented as a canonical reference in the **Microsoft Azure Architecture Center**
+  ("CQRS pattern"), which describes exactly this split — a write store plus separately-shaped read
+  models kept in sync asynchronously — and is widely used to back e-commerce catalogs and order systems
+  where reads vastly outnumber writes (read:write ratios in the order of 10:1 to 100:1 are typical).
 
 ## Common misconception — "CQRS just means using a read replica / you should apply it everywhere"
 

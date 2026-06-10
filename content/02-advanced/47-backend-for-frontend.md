@@ -86,7 +86,9 @@ different clients**:
 ## In the wild
 
 - **BFF** was popularized by **SoundCloud/Netflix/Spotify** to serve mobile vs web well; common in
-  microservice frontends where one generic API can't satisfy all clients.
+  microservice frontends where one generic API can't satisfy all clients. Netflix famously ran a
+  **device-specific API layer to serve 1,000+ distinct device types** (TVs, consoles, phones, tablets),
+  each needing its own response shape — a scale where one generic API simply couldn't fit them all.
 - **Coexists with an API gateway** (gateway = shared edge concerns; BFFs = per-client tailoring) and is
   often built **per-client by the owning frontend team**.
 - **GraphQL** is a frequent **alternative or implementation** (GraphQL-as-BFF) for client-tailored

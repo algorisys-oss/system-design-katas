@@ -85,7 +85,10 @@ Backup frequency is a dial: how often you back up sets your RPO, and tighter RPO
 ## In the wild
 
 - **Managed databases** (RDS, Cloud SQL) offer automated daily snapshots + continuous WAL archiving
-  for PITR, retained for a configurable window.
+  for PITR, retained for a configurable window. Amazon RDS retains automated backups for a default of
+  7 days (configurable up to 35) and supports PITR to roughly any second within that window
+  (commonly ~5-minute restore granularity); Cloud SQL PITR defaults to 7 days of transaction-log
+  retention.
 - **Restore drills are mandatory:** a backup you've never restored is a hope, not a backup. Test
   restores regularly and time them (that's your real RTO).
 - **Retention & compliance:** keep backups long enough for legal/audit needs; encrypt them; control

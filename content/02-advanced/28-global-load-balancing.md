@@ -30,6 +30,11 @@ based on:
 - **Capacity/policy:** balance load across regions, respect data-residency rules, do weighted/canary
   rollouts.
 
+**Analogy:** think of a national support line. The phone system first routes your call by area code
+to the **nearest branch** (the global tier picking a region), and only then does that branch hand you
+to an **available agent** (the regional tier picking a server). If a whole branch is closed, the system
+reroutes your call to the next-nearest open one — exactly what whole-region failover does.
+
 It's the **inter-region** tier above the **intra-region** load balancers you already know (which then
 spread requests across servers in that region).
 
@@ -108,6 +113,12 @@ Choosing the routing mechanism is a dial between operational simplicity and fail
   **disaster recovery** (region failover).
 - **Low DNS TTLs + health checks** are standard for DNS-based GSLB to limit failover lag; **anycast**
   where fast failover matters.
+- **Concrete numbers:** DNS-based GSLB typically uses **low TTLs of ~30–60s**, so failover still takes
+  **tens of seconds to a few minutes** as cached records expire (and some resolvers honor TTLs
+  imperfectly). **Anycast** failover is **network-level** — BGP reconverges to the next-nearest
+  location in **seconds**, with no DNS-cache dependence. AWS Route 53 health checks default to a
+  **30-second interval** (with a 10-second "fast" option), and treat an endpoint as unhealthy after a
+  small number of consecutive failed checks.
 
 ## Common misconception — "a load balancer already handles this" / "global LB makes failover instant"
 

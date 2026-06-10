@@ -76,8 +76,9 @@ cycle. And a cycle spent *waiting on memory* (a cache miss, ch. 2) does no usefu
 
 - A modern core runs at **~3–5 GHz** and, thanks to pipelining + multiple execution units, retires
   **several instructions per cycle** — billions of instructions/second per core.
-- **Servers** ship with many cores (tens to hundreds across sockets); horizontal scaling later is
-  "more machines × more cores."
+- **Servers** ship with many cores (tens to hundreds across sockets) — e.g. **AMD EPYC 9004
+  ("Genoa")** server CPUs reach **96 cores / 192 threads per socket** at roughly 2.4–3.7 GHz;
+  horizontal scaling later is "more machines × more cores."
 - **"CPU-bound" vs "I/O-bound"** is the first question in any performance investigation: is the core
   actually computing, or waiting? Tools report this as CPU utilization.
 - **Context switching** (the OS swapping which stream a core runs) has real cost — thousands of

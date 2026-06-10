@@ -22,7 +22,8 @@ drops**. **MQTT** is the protocol built exactly for this — the de-facto standa
 
 ## Mental model — lightweight pub/sub for constrained devices
 
-**MQTT (Message Queuing Telemetry Transport)** is a **lightweight publish/subscribe** protocol over
+**MQTT** (originally "MQ Telemetry Transport," after IBM's MQ messaging product; the OASIS standard
+now treats MQTT as a name rather than an acronym) is a **lightweight publish/subscribe** protocol over
 TCP, designed for **low bandwidth, low power, and unreliable networks**. Devices connect to a
 **broker** and publish/subscribe to **topics** (hierarchical, like `home/livingroom/temp`) — the same
 pub/sub fan-out model you know, but with a minimal wire format and features tuned for tiny, flaky
@@ -133,7 +134,7 @@ for backend processing.
 Flip each card to check yourself, then move through the deck:
 
 ```flashcards
-{ "title": "MQTT — key terms", "cards": [ { "front": "MQTT", "back": "Message Queuing Telemetry Transport: a lightweight publish/subscribe protocol over TCP, designed for low-bandwidth, low-power, unreliable networks. The de-facto IoT messaging standard." }, { "front": "Broker and topics", "back": "Devices connect to a broker and publish/subscribe to hierarchical topics (e.g. home/livingroom/temp), giving pub/sub fan-out with a minimal binary wire format." }, { "front": "QoS 0 / 1 / 2", "back": "Per-message delivery guarantee: QoS 0 at-most-once (fire-and-forget, may lose), QoS 1 at-least-once (acked, may duplicate), QoS 2 exactly-once (more handshaking, higher cost)." }, { "front": "Last Will & Testament (LWT)", "back": "A message a device pre-registers that the broker publishes automatically if the device disconnects unexpectedly, signaling the sensor went offline without polling." }, { "front": "Retained messages", "back": "The broker keeps the last message per topic so a new subscriber immediately receives the current value instead of waiting for the next publish." }, { "front": "Keepalive connection", "back": "A device holds one long-lived TCP connection alive with heartbeat pings, avoiding repeated TCP/TLS handshakes and saving battery and bandwidth." } ] }
+{ "title": "MQTT — key terms", "cards": [ { "front": "MQTT", "back": "Originally 'MQ Telemetry Transport' (after IBM's MQ product); the OASIS standard now treats MQTT as a name, not an acronym. A lightweight publish/subscribe protocol over TCP, designed for low-bandwidth, low-power, unreliable networks. The de-facto IoT messaging standard." }, { "front": "Broker and topics", "back": "Devices connect to a broker and publish/subscribe to hierarchical topics (e.g. home/livingroom/temp), giving pub/sub fan-out with a minimal binary wire format." }, { "front": "QoS 0 / 1 / 2", "back": "Per-message delivery guarantee: QoS 0 at-most-once (fire-and-forget, may lose), QoS 1 at-least-once (acked, may duplicate), QoS 2 exactly-once (more handshaking, higher cost)." }, { "front": "Last Will & Testament (LWT)", "back": "A message a device pre-registers that the broker publishes automatically if the device disconnects unexpectedly, signaling the sensor went offline without polling." }, { "front": "Retained messages", "back": "The broker keeps the last message per topic so a new subscriber immediately receives the current value instead of waiting for the next publish." }, { "front": "Keepalive connection", "back": "A device holds one long-lived TCP connection alive with heartbeat pings, avoiding repeated TCP/TLS handshakes and saving battery and bandwidth." } ] }
 ```
 
 ## Key takeaways

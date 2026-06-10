@@ -25,7 +25,13 @@ systems that must stay up, you migrate **incrementally**, with old and new coexi
 
 The core principle: **never make a breaking change in one step on a live system.** Instead, evolve in
 **small, backward-compatible steps** where the **old and new schemas/code coexist**, so at every moment
-the running system works with whatever state the migration is in. The canonical approach is
+the running system works with whatever state the migration is in.
+
+Think of **renovating the kitchen of a restaurant that never closes.** You don't shut the doors and rip
+out the old line. You **build the new cooking station beside the old one**, run **both** for a while
+(every order goes to both, the old line is still the one that plates), gradually **move the cooks over**
+once the new station is proven, and only then **tear out the old station** — last. Service never stops,
+and at any point you can fall back to the old line. That's exactly the canonical approach:
 **expand/contract (parallel change)**:
 
 ```stepper
@@ -67,7 +73,7 @@ The power of expand/contract is that **every step is small, backward-compatible,
 The same incremental, coexist-and-cutover thinking scales up:
 - **Database/datastore migration (e.g. to a new DB):** **dual-write to both databases**, **backfill**
   history, **verify/reconcile**, **shift reads gradually** (a %), then **decommission** the old — often
-  with the **strangler fig** pattern (recall — next module) for the surrounding app.
+  with the **strangler fig** pattern (covered in a later chapter) for the surrounding app.
 - **Online schema-change tools:** for big tables, tools like **gh-ost / pt-online-schema-change**
   (MySQL) build the new table + backfill + swap **without locking** the live table.
 - **Backfills must be gentle:** batch + throttle so the backfill doesn't overload the DB or starve live
@@ -89,7 +95,7 @@ The same incremental, coexist-and-cutover thinking scales up:
 - **Dual-write + backfill + gradual read cutover** is the playbook for **datastore migrations** (and is
   how big companies move between databases live); **CDC** (recall outbox/CDC) can drive replication to
   the new store.
-- **Strangler fig** (next module) is the app-level analogue — incrementally route functionality to the
+- **Strangler fig** (a later chapter) is the app-level analogue — incrementally route functionality to the
   new system.
 - De-risked with **feature flags, shadow reads, canary %, reconciliation, and instant rollback** (recall
   canary deploys, blast radius).

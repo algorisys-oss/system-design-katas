@@ -86,7 +86,11 @@ that doesn't know it's been demoted** (recall leader election: the partitioned/p
 ## In the wild
 
 - **Consensus systems** (etcd, ZooKeeper, Consul, Raft-based DBs) prevent split-brain via **majority
-  quorum** — the minority partition becomes read-only/unavailable (CP).
+  quorum** — the minority partition becomes read-only/unavailable (CP). etcd recommends an **odd cluster
+  size of 3, 5, or 7** members: majority = `(n/2)+1`, so a **3-node** cluster (majority 2) tolerates **1**
+  failure, a **5-node** cluster (majority 3) tolerates **2**, and a **7-node** cluster (majority 4)
+  tolerates **3** — note 6 nodes (majority 4) still tolerate only 2, no better than 5, which is why even
+  sizes aren't used.
 - **Databases:** primary/replica setups use quorum + **witness/arbiter** nodes (e.g. MongoDB replica-set
   arbiter, Patroni for Postgres with etcd) to avoid two primaries; **fencing tokens** guard writes.
 - **HA clusters** (Pacemaker/Corosync) use **STONITH** to fence a misbehaving node.

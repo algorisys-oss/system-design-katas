@@ -87,7 +87,13 @@ delivered continuously** — not all at the end:
 ## In the wild
 
 - **Legacy modernization** (monolith → microservices, mainframe → modern stack) is the classic use;
-  Martin Fowler popularized the term. Widely used to de-risk large rewrites.
+  **Martin Fowler** popularized the term (2004), drawing on **Paul Hammant**'s documented strangler
+  migrations. Widely used to de-risk large rewrites.
+- **Named cases:** **Netflix** spent roughly **7 years (2009–2016)** moving off its monolithic
+  data-center stack to hundreds of microservices on AWS — incrementally, service by service, never a
+  big-bang cutover. **Amazon** likewise decomposed its original monolith ("Obidos") into services
+  over years rather than rewriting at once. The common thread: a **multi-year, piece-by-piece** strangle,
+  not a single switch.
 - **Implemented with an API gateway / reverse proxy** (recall) for per-route routing, plus
   **zero-downtime migration** techniques (dual-write/CDC — recall) for shared data and an
   **anti-corruption layer** for clean boundaries.

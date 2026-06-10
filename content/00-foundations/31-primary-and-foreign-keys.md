@@ -153,5 +153,5 @@ Flip each card to check yourself, then move through the deck:
 
 ## Up next
 
-Wrapping multiple writes safely needs more than keys. Next: **Database Transactions** — using ACID in
-practice.
+Keys connect tables, but how you lay those tables out decides how clean your data stays. Next:
+**Schema Design & Normalization** — structuring tables to avoid redundancy and anomalies.

@@ -4,7 +4,7 @@ slug: sql-vs-nosql
 level: foundations
 module: database-fundamentals
 order: 28
-reading_time_min: 16
+reading_time_min: 8
 concepts: [sql, nosql, relational, document, key-value, schema, scaling, joins]
 use_cases: []
 prerequisites: [where-your-data-lives]
@@ -26,8 +26,10 @@ answer is "it depends," but on *what* is learnable.
 - **SQL (relational)** is a set of **structured spreadsheets** (tables) with a fixed schema, where
   rows in different tables relate via keys, and a powerful query language (SQL) lets you filter, join,
   and aggregate across them.
-- **NoSQL** is an umbrella for **non-relational** stores that relax the rigid schema and relational
-  model to gain flexibility and scale — documents, key-value pairs, wide-columns, graphs.
+- **NoSQL** is a **filing system** of independent folders you grab whole by their label — each file
+  holds everything about one thing, with no fixed form and no built-in cross-references to join. It's
+  an umbrella for **non-relational** stores that relax the rigid schema and relational model to gain
+  flexibility and scale — documents, key-value pairs, wide-columns, graphs.
 
 Neither is "newer = better." They make different trade-offs around **schema, querying, consistency,
 and how they scale.**

@@ -99,8 +99,9 @@ Fan-out and gossip interval are the dial that trades propagation speed against n
 
 - **Cassandra, DynamoDB's lineage, Riak, Consul (Serf/SWIM), Redis Cluster** use gossip for
   **membership, failure detection, and topology dissemination**.
-- **SWIM** is a popular gossip-based membership+failure-detection protocol (used by Serf/Consul,
-  HashiCorp tooling).
+- **SWIM** is a popular membership protocol: it **gossips** (infection-style) to disseminate
+  membership changes, paired with a **direct + indirect (ping / ping-req)** failure detector — the
+  failure-detection component is deliberately *not* gossip (used by Serf/Consul, HashiCorp tooling).
 - Gossip carries the **consistent-hashing ring** state and node health across Dynamo-style clusters
   (recall consistent hashing + heartbeats).
 - It coexists with **consensus** (for the strong-agreement parts) and **anti-entropy** (for data
@@ -160,7 +161,7 @@ Flip each card to check yourself, then move through the deck:
   { "front": "Gossip (epidemic) protocol", "back": "Each node periodically exchanges state with a few random peers, so information spreads exponentially, reaching all N nodes in ~O(log N) rounds with no central coordinator." },
   { "front": "Why does gossip scale?", "back": "Each node contacts a constant few peers regardless of N, so per-node work is O(1) and total messages O(N) — avoiding a coordinator bottleneck/SPOF and an O(N²) all-to-all mesh." },
   { "front": "Membership & failure detection", "back": "Nodes gossip 'who's alive' via heartbeat counters / suspicion levels; if a node stops being mentioned as alive, peers eventually mark it failed — decentralized, no single monitor." },
-  { "front": "SWIM", "back": "A popular gossip-based membership and failure-detection protocol, used by Serf/Consul and HashiCorp tooling." },
+  { "front": "SWIM", "back": "A popular membership protocol: it gossips (infection-style) to disseminate membership changes, paired with a direct + indirect (ping / ping-req) failure detector. Note the failure-detection part is deliberately NOT gossip. Used by Serf/Consul and HashiCorp tooling." },
   { "front": "Gossip vs consensus", "back": "Gossip = 'everyone eventually knows' (scalable, eventually consistent, probabilistic, delayed). Consensus (Paxos/Raft) = 'everyone agrees exactly, now' for leader election or committing a value." },
   { "front": "Fan-out and interval", "back": "Tunable knobs: how many peers per round and how often to gossip. They trade propagation speed against network load and redundant message overhead." }
 ] }
