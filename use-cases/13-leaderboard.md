@@ -18,7 +18,8 @@ status: published
 > change.
 > **Domain:** mobile games, esports, fitness apps (steps/distance), trading competitions, Stack
 > Overflow-style reputation, "most active this week" feeds.
-> **Scale:** tens of millions of players, tens of thousands of score updates/sec at peak, top-N
+> **Scale:** tens of millions of players, several thousand score events/sec at peak (tens of
+> thousands of key-writes/sec once each event fans out to daily/weekly/all-time boards), top-N
 > reads on every screen open.
 > **Core challenges:** an efficient **sorted structure** for rank/top-k; **rank queries at scale**;
 > **sharding** by score range or partial boards; the **hot key** of a single global board;
@@ -43,7 +44,8 @@ constantly under heavy concurrency. That combination is what makes this a real d
 - **Near-real-time:** an update is reflected in rank within ~1 second.
 - **Low-latency reads:** top-N and my-rank in single-digit milliseconds (they're on the hot path of
   every game screen).
-- **Scale:** tens of millions of members per board; tens of thousands of updates/sec.
+- **Scale:** tens of millions of members per board; several thousand score events/sec (tens of
+  thousands of key-writes/sec after fan-out to daily/weekly/all-time boards).
 - **Correct ties & determinism:** equal scores need a stable tiebreak (e.g. who reached it first).
 - **Cost-aware:** an exact global rank for 40M players is expensive — approximate is often fine.
 
@@ -100,16 +102,22 @@ INCREMENT  :  ZINCRBY boardKey <delta>  <playerId>        // atomic +delta
 TOP N      :  ZREVRANGE boardKey 0 N-1 WITHSCORES         // highest first
 MY RANK    :  ZREVRANK boardKey <playerId>                // 0-based, descending
 MY SCORE   :  ZSCORE   boardKey <playerId>
-NEIGHBORS  :  ZREVRANGE boardKey (rank-2) (rank+2) WITHSCORES
+NEIGHBORS  :  ZREVRANGE boardKey {rank-2} {rank+2} WITHSCORES   // substitute computed integer indices
 ```
 
 `ZADD`/`ZINCRBY` are **O(log n)**; `ZREVRANK` and `ZREVRANGE` are **O(log n + k)**. That single fact
 — rank in **O(log n)**, not O(n) — is why a sorted set, not a SQL table, is the heart of the design.
 
 **Tiebreaks.** Equal raw scores need a deterministic order. The trick is to **encode the tiebreak
-into the float score** itself: `composite = points * 1e13 - (timestampMillis)` so that, among equal
-points, the *earlier* achiever sorts higher. Redis scores are IEEE-754 doubles (~15–16 significant
-digits), so you get one number that's both score and tiebreak.
+into the float score** itself — `composite = points * M - tiebreak` — so that, among equal points,
+the *earlier* achiever sorts higher. **Mind the precision budget, though:** Redis scores are IEEE-754
+doubles, exact only for integers up to 2⁵³ (~9×10¹⁵, ~15–16 significant digits). The naive
+`points * 1e13 - timestampMillis` overflows that budget once `points` exceeds ~900 — a 13-digit
+millisecond timestamp eats almost the whole mantissa, and beyond that the ordering silently corrupts.
+Budget the digits explicitly (points-digits + tiebreak-digits ≤ 15) and use a **coarser, relative
+tiebreak** — e.g. *seconds since the board's epoch* rather than absolute millis — with the multiplier
+`M` chosen larger than the tiebreak's maximum so the two fields never collide. That keeps one number
+that's both score and tiebreak while staying exact across realistic score ranges.
 
 ## 4 · High-level architecture
 

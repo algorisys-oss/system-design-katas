@@ -5,7 +5,7 @@ level: use-cases
 module: ai-systems
 order: 20
 reading_time_min: 20
-concepts: [embeddings, approximate-nearest-neighbor, hnss-ivf, hybrid-search, chunking, retrieval-augmented-generation]
+concepts: [embeddings, approximate-nearest-neighbor, hnsw-ivf, hybrid-search, chunking, retrieval-augmented-generation]
 use_cases: [rag-vector-search]
 prerequisites: [database-sharding, caching-patterns-overview, replication-strategies, high-cardinality-data, lambda-vs-kappa-architecture]
 status: published

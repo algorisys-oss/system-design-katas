@@ -82,7 +82,11 @@ Functional tests ask "is it correct?"; performance tests ask "does it hold up un
 - **Capacity planning** uses load/stress results + estimation (recall back-of-the-envelope) to
   provision and set **autoscaling** thresholds.
 - **Pre-launch ritual:** load + spike test before big events; **soak test** before long-running
-  deployments; run perf tests in CI/staging to catch regressions.
+  deployments; run perf tests in CI/staging to catch regressions. A common rule of thumb is to load-
+  test to **2–3× expected peak** and set autoscaling to trigger *before* saturation (e.g. a target-
+  tracking policy around ~**60–70% CPU**, not 95%). **Netflix** goes further with **"squeeze
+  testing"** — steering real production traffic at a single instance until it degrades, to measure
+  true per-instance capacity rather than a synthetic estimate.
 - Findings feed resilience: rate limiting, load shedding, circuit breakers, bigger pools, caching
   (much of this course).
 

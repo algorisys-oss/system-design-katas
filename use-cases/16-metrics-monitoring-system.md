@@ -71,7 +71,7 @@ and the hardest enemy is not load but **cardinality** — the number of distinct
 {
   "title": "Raw storage per day (compressed)",
   "inputs": [
-    { "key": "samplesPerSec", "label": "Samples/sec", "default": 333000 },
+    { "key": "samplesPerSec", "label": "Samples/sec", "default": 333333 },
     { "key": "bytesPerSample", "label": "Bytes per sample (after compression)", "default": 2 }
   ],
   "formula": "samplesPerSec * 86400 * bytesPerSample",
@@ -372,6 +372,6 @@ delta/XOR-compressed chunks, head + WAL + compacted blocks, downsampling) · `hi
 (the central scaling constraint — bounded labels, active-series limits, churn) ·
 `metrics-and-key-system-metrics` (counters/gauges/histograms, `rate()`, percentiles from buckets) ·
 `slis-slos-error-budgets` (burn-rate alerting on the error budget). It also leans on
-`consistent-hashing` (sharding ingest across a hash ring), `lsm-trees` / `columnar-storage` (the
-storage layout), `single-point-of-failure` (single-node TSDB and HA replication), and
+`consistent-hashing` (sharding ingest across a hash ring), `lsm-trees-and-compaction` plus columnar
+storage (the storage layout), `single-point-of-failure` (single-node TSDB and HA replication), and
 `backpressure-and-load-shedding` (rejecting runaway series, capping query fan-out).

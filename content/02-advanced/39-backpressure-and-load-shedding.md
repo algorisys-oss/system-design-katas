@@ -91,7 +91,7 @@ When you can't apply backpressure (e.g. external users on the open internet won'
   implement **backpressure** as a first-class concept; **bounded queues/thread pools** are the basic
   mechanism. In Reactive Streams a subscriber signals demand via `request(n)`, capping in-flight items
   to **N**; **HTTP/2** (which gRPC rides on) bounds each stream with a flow-control window whose default
-  initial size is **65,535 bytes (64 KiB)** per RFC 7540/9113 — the receiver won't accept more until it
+  initial size is **65,535 bytes** (2¹⁶ − 1, one byte short of 64 KiB) per RFC 7540/9113 — the receiver won't accept more until it
   sends `WINDOW_UPDATE`.
 - **Load shedding** is standard at gateways/load balancers and in services (return **503** when
   overloaded); **prioritized shedding** protects critical traffic (Google/Envoy-style adaptive

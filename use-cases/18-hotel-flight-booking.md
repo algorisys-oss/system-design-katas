@@ -78,9 +78,9 @@ inventory must agree** even though they live in different systems that can each 
 }
 ```
 
-> Search runs at **~1.8 million availability lookups/sec** (≈2M searches/day × 20-property fan-out ×
+> Search runs at **~1.8 million availability lookups/sec** (≈2B searches/day × 20-property fan-out ×
 > 4 peak) — must be cached and read-replicated.
-> Bookings are only **~100 writes/sec average** — tiny throughput, but every one must be transactional,
+> Bookings are only **~90 writes/sec average** — tiny throughput, but every one must be transactional,
 > idempotent, and coordinated with payment. **The scale challenge is on reads; the correctness
 > challenge is on writes.** Design each independently.
 

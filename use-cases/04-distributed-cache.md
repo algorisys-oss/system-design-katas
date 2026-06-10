@@ -180,7 +180,7 @@ RAM is finite; when the cache fills, it must drop keys to make room. The policy 
 {
   "options": [
     { "label": "TTL / expiry", "points": ["Each key dies at its set deadline", "Memory self-cleans; bounds staleness", "Doesn't help if many keys are live at once", "Always combine with another policy"] },
-    { "label": "LRU (least recently used)", "points": ["Evict the key untouched longest", "Great when recent = popular (temporal locality)", "Approximated by sampling, not exact, to stay O(1)", "Redis/Memcached default-ish choice"] },
+    { "label": "LRU (least recently used)", "points": ["Evict the key untouched longest", "Great when recent = popular (temporal locality)", "Approximated by sampling, not exact, to stay O(1)", "Memcached's default; a common Redis choice (Redis itself defaults to noeviction)"] },
     { "label": "LFU (least frequently used)", "points": ["Evict the key accessed fewest times", "Keeps steadily-popular keys over one-off scans", "Needs a counter per key (with decay)", "Better against scan/flush traffic"] },
     { "label": "Random", "points": ["Evict any key", "O(1), zero bookkeeping", "Ignores popularity — lower hit rate", "Fallback when metadata cost matters"] }
   ]

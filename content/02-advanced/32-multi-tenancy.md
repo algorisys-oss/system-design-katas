@@ -95,7 +95,11 @@ Drag the isolation dial from fully shared to fully siloed to see what you trade 
 
 - **SaaS platforms** universally face this: Salesforce/Workday (heavily pooled with strong logical
   isolation), many B2B SaaS use **pooled + tenant_id** with **row-level security**; enterprise tiers
-  often get **siloed** databases/instances.
+  often get **siloed** databases/instances. Concretely, **Salesforce** runs a **metadata-driven**
+  multi-tenant model — many customers' rows share the same physical tables, tagged by an **OrgID**,
+  with the schema described in metadata rather than per-tenant DDL. **Shopify** instead places groups
+  of shops in isolated **"pods"** (each a full app + database stack), so one pod's failure can't take
+  down the rest — the pooled-vs-siloed trade-off playing out at two different scales.
 - **Postgres row-level security**, per-tenant schemas, and **per-tenant encryption keys** are common
   isolation mechanisms; **cells/pods** bound blast radius (recall — next module).
 - It composes with **sharding** (shard by tenant_id) and **federation/polyglot** (recall) — and with

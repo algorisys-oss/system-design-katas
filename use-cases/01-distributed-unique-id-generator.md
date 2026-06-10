@@ -73,7 +73,7 @@ How many IDs can one machine mint per millisecond, and does the bit budget cover
     { "key": "tsBits", "label": "Timestamp bits", "default": 41 },
     { "key": "msPerYear", "label": "Milliseconds per year (~)", "default": 31536000000 }
   ],
-  "formula": "Math.round(Math.pow(2, tsBits) / msPerYear)",
+  "formula": "Math.floor(Math.pow(2, tsBits) / msPerYear)",
   "resultLabel": "Years of millisecond timestamps",
   "resultUnit": "years"
 }

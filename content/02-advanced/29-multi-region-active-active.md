@@ -63,7 +63,10 @@ locally and replicated **asynchronously**, which means conflicts *will* happen. 
 
 ## Build it up — consistency, latency, and when each fits
 
-- **CAP/PACELC reality:** active-active across regions means **asynchronous replication** → **eventual
+- **CAP/PACELC reality:** *(PACELC extends CAP: **if P**artitioned, trade **A**vailability vs
+  **C**onsistency; **E**lse — in normal, partition-free operation — trade **L**atency vs
+  **C**onsistency. That "else latency" is the cross-region round trip you pay for strong consistency.)*
+  Active-active across regions means **asynchronous replication** → **eventual
   consistency** between regions (and conflict resolution). If you need **strong global consistency**,
   you must coordinate (consensus/synchronous quorum across regions), paying **cross-region latency** on
   writes — which active-active is trying to avoid. So active-active usually accepts **eventual
@@ -98,8 +101,8 @@ Where you land on the active-passive ↔ active-active dial is a trade between c
   writes, Redis Active-Active (CRDT-based) — all provide cross-region writes with conflict resolution.
   DynamoDB Global Tables typically propagate a write to other regions in **under ~1 second**
   (sub-second to single-digit seconds at the tail) per AWS's docs — which only works because that
-  replication is **asynchronous**: a synchronous round trip between, say, `us-east-1` and `eu-west-1`
-  costs roughly **70–90 ms** each way, so coordinating every write across the Atlantic would add that
+  replication is **asynchronous**: a synchronous **round trip** between, say, `us-east-1` and `eu-west-1`
+  costs roughly **70–90 ms** (about 35–45 ms each way), so coordinating every write across the Atlantic would add that
   latency to every request. That gap is exactly why active-active leans on async replication + conflict
   resolution rather than synchronous cross-region coordination.
 - **Active-passive / single-writer** is common for strongly-consistent systems (a primary region with

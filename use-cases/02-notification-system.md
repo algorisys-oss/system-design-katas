@@ -172,7 +172,7 @@ ambiguity). You defend in layers:
 {
   "options": [
     { "label": "At ingest (collapse duplicate requests)", "points": ["Unique constraint on idempotency_key", "Second POST with same key returns the original notification_id, doesn't re-queue", "Stops producer-side double-submits", "Cheap: one indexed lookup"] },
-    { "label": "At the worker (drop redeliveries)", "points": ["Before the provider call, SETNX seen:{key}:{channel} in Redis with a TTL", "If the key already exists, ack and skip — a redelivered message is silently dropped", "Stops queue at-least-once duplicates", "TTL must exceed max retry window"] },
+    { "label": "At the worker (drop redeliveries)", "points": ["Before the provider call, record send-state in seen:{key}:{channel} (Redis, TTL'd): mark it in-flight", "On redelivery, skip only if the state is sent/ambiguous; a clean transient failure (503/429) is reset to retryable so the retry still re-sends", "Stops queue at-least-once duplicates without swallowing legitimate transient retries", "TTL must exceed max retry window"] },
     { "label": "Provider-side keys", "points": ["Pass an idempotency key to the provider when supported (e.g. SES/Stripe-style)", "Provider itself collapses your retries of the same send", "Covers the 'sent but timed out' ambiguity", "Not all providers support it — fall back to the Redis check"] }
   ]
 }
@@ -183,7 +183,10 @@ the message, but the response is lost (network blip). The worker doesn't know it
 retries — a duplicate. Mitigations: set the de-dup key **before** the call (so a retry after a crash is
 caught), prefer providers that accept an **idempotency key**, and treat ambiguous timeouts as "probably
 sent" for transactional messages where a missed send is worse than a rare dupe — or the reverse for
-expensive SMS, where a rare miss beats double-charging.
+expensive SMS, where a rare miss beats double-charging. The marker must therefore distinguish a
+**clean transient failure** (a 503/429 that definitively didn't send — leave it retryable) from a
+**sent/ambiguous** attempt (must not re-send); a bare "key exists → skip" set before the call would
+otherwise swallow the very transient retries the retry/backoff path depends on.
 
 ```reveal
 {

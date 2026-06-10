@@ -4,7 +4,7 @@ slug: rest-api-fundamentals
 level: foundations
 module: apis-and-the-web
 order: 19
-reading_time_min: 14
+reading_time_min: 9
 concepts: [rest, resources, http-methods, statelessness, api-design, crud]
 use_cases: []
 prerequisites: [http-fundamentals, client-server-and-anatomy-of-a-request]

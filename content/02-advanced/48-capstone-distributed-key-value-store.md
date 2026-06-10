@@ -26,7 +26,7 @@ Merkle-tree anti-entropy**. Follow the method: requirements → estimate → des
 Picture the hash ring as a **clock face**. Every node sits at some hour mark, and every key lands at its own
 spot on the dial. To find where a key lives, drop it on the face and let it **roll clockwise** to the next
 **N houses** it passes — those N houses are its **preference list**, the replicas that store it. Add a new
-house to the ring and only the keys that now roll into *it* move (~1/N); nobody else is disturbed — that's
+house to the ring and only the keys that now roll into *it* move (~1/(node count)); nobody else is disturbed — that's
 incremental scaling.
 
 Now picture reads and writes as **asking the neighbors**. You don't trust one house's word and you don't
@@ -92,7 +92,7 @@ that's it.
 
 **Partitioning & placement (consistent hashing, recall):** nodes and keys are placed on a **hash ring**;
 each key is stored on the **N successor nodes** clockwise from its position (its **preference list**).
-Adding/removing a node only moves **~1/N** of keys (recall) — incremental scaling, no reshuffle.
+Adding/removing a node only moves **~1/(node count)** of keys (recall) — incremental scaling, no reshuffle.
 **Virtual nodes** spread load evenly and smooth failures.
 
 **Replication & consistency (tunable quorums, recall):** each key is replicated to **N** nodes; a read
@@ -103,7 +103,7 @@ op (e.g. N=3: W=2/R=2 balanced, W=1 for max write availability).
 {
   "title": "Dynamo-style architecture (decentralized, no leader)",
   "nodes": [
-    { "label": "Consistent-hash ring", "detail": "Keys → N successor nodes (preference list); vnodes for even spread. Add nodes → ~1/N keys move." },
+    { "label": "Consistent-hash ring", "detail": "Keys → N successor nodes (preference list); vnodes for even spread. Add nodes → ~1/(node count) keys move." },
     { "label": "Coordinator (any node)", "detail": "The node a client hits coordinates the get/put to the key's N replicas (no central master)." },
     { "label": "Quorum R/W", "detail": "Write: W acks; Read: R responses (R+W>N for overlap). Tunable per op." },
     { "label": "Gossip membership", "detail": "Nodes gossip who's alive + ring state — decentralized, no SPOF (recall gossip)." }
@@ -200,12 +200,12 @@ different design. Quorums tune the consistency/availability dial; they do not fl
   "question": "In a Dynamo-style store, data placement and incremental scaling are handled by:",
   "options": [
     "A single primary node assigning keys",
-    "Consistent hashing — keys map to N successor nodes on a ring; adding a node moves only ~1/N of keys",
+    "Consistent hashing — keys map to N successor nodes on a ring; adding a node moves only ~1/(node count) of keys",
     "Two-phase commit",
     "A relational schema"
   ],
   "answer": 1,
-  "explanation": "Consistent hashing (with vnodes) places each key on its preference list and lets you add/remove nodes moving only ~1/N of keys — no central master."
+  "explanation": "Consistent hashing (with vnodes) places each key on its preference list and lets you add/remove nodes moving only ~1/(node count) of keys — no central master."
 }
 ```
 
@@ -257,7 +257,7 @@ Flip each card to check yourself, then move through the deck:
 - A **Dynamo-style key-value store** is the **AP** archetype: **always writable, horizontally scalable,
   no SPOF, eventually consistent** — composing the whole replication/anti-entropy module.
 - **Consistent hashing (+ vnodes)** places keys on N successor nodes (preference list) and enables
-  **incremental scaling** (~1/N moves); **tunable N/R/W quorums** dial consistency vs availability per op.
+  **incremental scaling** (~1/(node count) moves); **tunable N/R/W quorums** dial consistency vs availability per op.
 - **Failures/conflicts:** **sloppy quorum + hinted handoff** (transient availability), **vector clocks**
   (detect concurrent writes → **siblings/CRDTs** to resolve), **Merkle anti-entropy + read repair**
   (eventual convergence), **gossip** (decentralized membership).

@@ -131,10 +131,12 @@ There are two families of geospatial index. Both turn "near in space" into "near
 longitude, alternating, encoding each bit. The resulting bit-string (Base32-encoded) is a
 **geohash** — e.g. `9q8yy`. The magic: places that are close on Earth share a **long common
 prefix**. So a 1-D prefix range scan (`WHERE geohash LIKE '9q8yy%'`) returns a square-ish region —
-exactly what a B-tree does well. Longer prefix = smaller cell = finer precision. S2 (Google) and
-H3 (Uber) are the same idea with better-shaped cells: S2 maps the sphere to a Hilbert curve (cells
-stay compact and roughly equal-area, within ~2×); H3 uses hexagons (every neighbor is equidistant — handy for
-ride-hail).
+exactly what a B-tree does well. Longer prefix = smaller cell = finer precision. S2 (Google) is the
+same prefix-locality idea with better-shaped cells: it maps the sphere to a Hilbert curve, so nearby
+points share an index prefix (cells stay compact and roughly equal-area, within ~2×). H3 (Uber) is a
+*different* shape — a hierarchical **hexagonal** grid (every neighbor is equidistant — handy for
+ride-hail) — indexed by a hierarchical cell ID with parent/child containment, not a geohash-style
+prefix range scan.
 
 **Quadtree (tree subdivision).** Start with one square covering the world; whenever a cell holds
 more than *K* places, split it into 4 children, recursively. Dense areas (Manhattan) subdivide

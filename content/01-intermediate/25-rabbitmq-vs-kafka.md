@@ -87,7 +87,7 @@ flexible per-message router with complex routing both fight the tool's design.
 **Concrete scale.** The throughput gap the chapter keeps asserting is real: a single Kafka partition
 can sustain on the order of **tens of MB/s**, and clusters scale linearly to **millions of
 messages/sec** — LinkedIn, which open-sourced Kafka, has reported processing on the order of
-**7 trillion messages/day** (roughly 4.5 million msgs/sec on average) across its Kafka deployment.
+**7 trillion messages/day** (roughly 80 million msgs/sec on average) across its Kafka deployment.
 RabbitMQ classic queues typically sustain **tens of thousands of messages/sec per queue** (lower with
 persistence and complex routing, higher for transient direct delivery) — plenty for task queues, but
 orders of magnitude below Kafka's retained-log firehose. (Sources: Kafka/Confluent docs and
