@@ -27,15 +27,16 @@ host distributes them across available tables (servers) so no table is overwhelm
 get used — and the host stops seating anyone at a table that's "closed" (an unhealthy server). It
 turns "many servers" into "one address that's always available."
 
-```flow
+```fanout
 {
-  "title": "A load balancer in front of app servers",
-  "nodes": [
-    { "label": "Clients", "detail": "All hit one public address (the load balancer)." },
-    { "label": "Load balancer", "detail": "Picks a healthy server per request and forwards it; routes around failures." },
-    { "label": "Server pool (1..N, interchangeable)", "detail": "Each request goes to ONE healthy server; servers are stateless → interchangeable. Add/remove them freely behind the LB." }
+  "title": "A load balancer fans out to interchangeable servers",
+  "source": { "label": "Load balancer", "detail": "Clients all hit one public address; the LB picks a healthy server per request and routes around failures." },
+  "targets": [
+    { "label": "Server 1", "detail": "Stateless app server — interchangeable with the others." },
+    { "label": "Server 2", "detail": "Each request goes to ONE healthy server; add/remove servers freely behind the LB." },
+    { "label": "Server 3", "detail": "Horizontal scaling: more servers → more capacity, with no client changes." }
   ],
-  "note": "One address out front; many interchangeable servers behind. This is a fan-out, not a chain: the LB sends each request to ONE of the N parallel servers (not server-to-server in sequence). The LB is how horizontal scaling actually works."
+  "note": "One address out front; many interchangeable servers behind. A fan-out, not a chain: the LB sends each request to ONE of the N parallel servers — never server-to-server in sequence. This is how horizontal scaling actually works."
 }
 ```
 

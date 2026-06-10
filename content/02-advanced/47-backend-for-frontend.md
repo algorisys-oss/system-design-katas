@@ -28,15 +28,17 @@ A **Backend for Frontend (BFF)** is a **dedicated backend layer for a specific f
 services, and **aggregates, transforms, and tailors** data into **exactly the shape that client needs** —
 so the client gets one efficient, purpose-fit API instead of wrestling a generic one.
 
-```flow
+```fanout
 {
   "title": "A BFF per client type, fronting shared services",
-  "nodes": [
-    { "label": "Client (mobile / web / TV)", "detail": "Each client type talks only to its own BFF." },
-    { "label": "Its BFF (one per client type)", "detail": "Mobile BFF: small, battery/bandwidth-friendly payloads. Web BFF: richer data, aggregates many services per page. TV BFF: its own shape/fields." },
-    { "label": "Shared downstream services", "detail": "Orders, users, catalog, etc. — each BFF composes from these." }
+  "source": { "label": "Clients", "detail": "Mobile, web, and TV clients — each client type talks only to its own BFF." },
+  "targets": [
+    { "label": "Mobile BFF", "detail": "Small, battery/bandwidth-friendly payloads tailored to the mobile app." },
+    { "label": "Web BFF", "detail": "Richer data; aggregates many services per page." },
+    { "label": "TV BFF", "detail": "Its own shape/fields for the TV client." }
   ],
-  "note": "This is one representative pipeline. In reality there are multiple PEER BFFs — a Mobile BFF, a Web BFF, a TV BFF — each fronting the SAME shared services in PARALLEL; the BFFs do not chain into one another. Each BFF tailors aggregation/shape for ITS client."
+  "sink": { "label": "Shared services", "detail": "Orders, users, catalog, etc. — each BFF composes its client-specific response from these same downstream services." },
+  "note": "Peer BFFs (one per client type) front the SAME shared services in parallel; they do not chain into one another. Each BFF tailors aggregation/shape for ITS client."
 }
 ```
 

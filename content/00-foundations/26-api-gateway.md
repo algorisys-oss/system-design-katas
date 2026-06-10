@@ -27,15 +27,16 @@ desk**, which checks their identity, enforces the rules, and routes each request
 department. An API gateway is that front desk for your services: a single entry point that handles the
 **cross-cutting concerns** once, then forwards each request to the appropriate backend.
 
-```flow
+```fanout
 {
-  "title": "One gateway in front of many services",
-  "nodes": [
-    { "label": "Clients", "detail": "Web, mobile, partners — all talk to one address." },
-    { "label": "API Gateway", "detail": "Auth, rate limiting, routing, logging, TLS termination — done once, centrally." },
-    { "label": "Backend services (1..N)", "detail": "Each receives only valid, authenticated, rate-limited requests for its paths." }
+  "title": "One gateway fans out to many services",
+  "source": { "label": "API Gateway", "detail": "Clients (web, mobile, partners) all hit one address; the gateway does auth, rate limiting, routing, logging, and TLS termination once, centrally, then forwards to the right backend." },
+  "targets": [
+    { "label": "Users svc", "detail": "Receives only valid, authenticated, rate-limited requests for /users." },
+    { "label": "Orders svc", "detail": "Handles /orders; never sees unauthenticated or over-limit traffic." },
+    { "label": "Catalog svc", "detail": "Handles /catalog. Each service owns its own paths." }
   ],
-  "note": "Clients see one API; the gateway fans out, routing /users → users svc, /orders → orders svc, etc. — these are sibling backends reached in parallel, not a chain."
+  "note": "Clients see one API; the gateway routes /users → users svc, /orders → orders svc, etc. — sibling backends reached in parallel, not a chain."
 }
 ```
 

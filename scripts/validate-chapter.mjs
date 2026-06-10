@@ -48,7 +48,7 @@ let block;
 let interactiveCount = 0;
 const KNOWN = new Set([
   "quiz", "reveal", "stepper", "match", "compare", "tradeoff", "calc", "flashcards",
-  "diagram", "flow", "sequence", "layers", "ring", "ladder", "pipeline",
+  "diagram", "flow", "fanout", "sequence", "layers", "ring", "ladder", "pipeline",
 ]);
 while ((block = fence.exec(raw))) {
   const [, lang, body] = block;

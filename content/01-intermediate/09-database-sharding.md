@@ -27,15 +27,16 @@ Replication makes **copies of all the data**; sharding makes **slices of differe
 replicas). Users in the range `[0, 1M)` live on shard A, `[1M, 2M)` on shard B, etc. Now each shard handles only its slice
 of writes and storage — so total write capacity and storage scale with the number of shards.
 
-```flow
+```fanout
 {
-  "title": "Sharding by shard key",
-  "nodes": [
-    { "label": "Write / query", "detail": "Comes in with some key (e.g. user_id)." },
-    { "label": "Router", "detail": "Maps the shard key → which shard holds that data." },
-    { "label": "One shard (of N)", "detail": "The router picks exactly ONE shard for this key — rows for one key range/bucket, with its own primary + replicas." }
+  "title": "A router directs each key to one of N shards",
+  "source": { "label": "Router", "detail": "A write/query arrives with a shard key (e.g. user_id); the router maps the key → which shard holds that data." },
+  "targets": [
+    { "label": "Shard A", "detail": "Rows for one key range/bucket — a full database with its own primary + replicas." },
+    { "label": "Shard B", "detail": "A different slice of the keyspace. The router picks exactly ONE shard per key." },
+    { "label": "Shard C", "detail": "More shards → more total write + storage capacity." }
   ],
-  "note": "Shards A, B, C… are parallel siblings, not a pipeline: the router maps the shard key to exactly one of them, so each request lands on a single shard. Each shard is a full database for its slice. More shards → more total write + storage capacity."
+  "note": "Shards A, B, C… are parallel siblings, not a pipeline: the router maps the shard key to exactly one of them, so each request lands on a single shard."
 }
 ```
 

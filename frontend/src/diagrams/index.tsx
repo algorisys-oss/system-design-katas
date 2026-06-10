@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { Layers } from "./layers";
 import { Ladder } from "./ladder";
 import { Flow } from "./flow";
+import { Fanout } from "./fanout";
 import { Sequence } from "./sequence";
 import { Ring } from "./ring";
 
@@ -11,6 +12,7 @@ export const DIAGRAMS: Record<string, ComponentType<any>> = {
   layers: Layers,
   ladder: Ladder,
   flow: Flow,
+  fanout: Fanout,
   sequence: Sequence,
   ring: Ring,
 };
